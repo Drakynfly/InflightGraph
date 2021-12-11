@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2018 Jhonny Hueller
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "Toolkits/InflightGraphEditorToolkit.h"
 #include "PropertyEditorModule.h"

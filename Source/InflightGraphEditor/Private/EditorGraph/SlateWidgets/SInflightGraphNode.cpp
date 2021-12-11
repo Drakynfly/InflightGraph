@@ -1,4 +1,5 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+
 #include "EditorGraph/SlateWidgets/SInflightGraphNode.h"
 #include "Slate.h"
 #include "GraphEditorSettings.h"

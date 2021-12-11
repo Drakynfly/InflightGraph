@@ -1,19 +1,16 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
-#include "UObject/WeakObjectPtr.h"
 #include "InflightGraphEditor_ClassHelper.generated.h"
 
 /**
  *
  */
-
 USTRUCT()
 struct FInflightGraphEditor_ClassData
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	FInflightGraphEditor_ClassData() {}
 	FInflightGraphEditor_ClassData(UClass* InClass, const FString& InDeprecatedMessage);

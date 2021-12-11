@@ -1,4 +1,5 @@
-﻿// Copyright (c) 2018 Jhonny Hueller
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+
 #pragma once
 
 #include "Toolkits/AssetEditorToolkit.h"

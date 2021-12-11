@@ -1,8 +1,7 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "AssetTypeActions/InflightGraph_AssetTypeActions.h"
 #include "Modules/ModuleManager.h"
-
 #include "Graphs/InflightGraph.h"
 #include "Toolkits/InflightGraphEditorToolkit.h"
 #include "Module/InflightEditor.h"

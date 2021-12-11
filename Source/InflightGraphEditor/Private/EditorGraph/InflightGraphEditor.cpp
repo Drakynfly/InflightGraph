@@ -1,7 +1,7 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+
 #include "EditorGraph/InflightGraphEditor.h"
 #include "EdGraph/EdGraphPin.h"
-
 #include "Nodes/InflightGraphNode.h"
 #include "EditorGraph/EditorNodes/InflightGraphNodeEditor.h"
 #include "Utility/InflightGraph_Log.h"

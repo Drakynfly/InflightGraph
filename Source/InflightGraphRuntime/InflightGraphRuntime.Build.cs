@@ -1,4 +1,4 @@
-﻿// Some copyright should be here...
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 using UnrealBuildTool;
 

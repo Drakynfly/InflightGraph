@@ -1,6 +1,6 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-#include "Factories/InflightGraph_AssetFactory.h"
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
+#include "Factories/InflightGraph_AssetFactory.h"
 #include "Graphs/InflightGraph.h"
 
 UInflightGraph_AssetFactory::UInflightGraph_AssetFactory()
