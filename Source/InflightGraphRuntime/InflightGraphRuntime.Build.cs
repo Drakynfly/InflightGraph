@@ -21,7 +21,8 @@ public class InflightGraphRuntime : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"EnhancedInput"
 			});
 	}
 }

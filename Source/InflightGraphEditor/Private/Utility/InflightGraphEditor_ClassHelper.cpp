@@ -11,9 +11,7 @@
 #define LOCTEXT_NAMESPACE "InflightGraphEditor_ClassData"
 
 FInflightGraphEditor_ClassData::FInflightGraphEditor_ClassData(UClass* InClass, const FString& InDeprecatedMessage)
-  :	bIsHidden(0),
-	bHideParent(0),
-	Class(InClass),
+  :	Class(InClass),
 	DeprecatedMessage(InDeprecatedMessage)
 {
 	Category = GetCategory();
@@ -26,9 +24,7 @@ FInflightGraphEditor_ClassData::FInflightGraphEditor_ClassData(UClass* InClass, 
 
 FInflightGraphEditor_ClassData::FInflightGraphEditor_ClassData(const FString& InAssetName,
 	const FString& InGeneratedClassPackage, const FString& InClassName, UClass* InClass)
-  :	bIsHidden(0),
-	bHideParent(0),
-	Class(InClass),
+  :	Class(InClass),
 	AssetName(InAssetName),
 	GeneratedClassPackage(InGeneratedClassPackage),
 	ClassName(InClassName)
@@ -356,7 +352,7 @@ void FInflightGraphEditor_ClassHelper::FindAllSubClasses(const TSharedPtr<FInfli
 {
 	if (Node.IsValid())
 	{
-		if (!Node->Data.IsAbstract() && !Node->Data.IsDeprecated() && !Node->Data.bIsHidden)
+		if (!Node->Data.IsAbstract() && !Node->Data.IsDeprecated() && !Node->Data.IsHidden)
 		{
 			AvailableClasses.Add(Node->Data);
 		}
@@ -400,13 +396,13 @@ void FInflightGraphEditor_ClassHelper::BuildClassGraph()
 			FString DeprecatedMessage = GetDeprecationMessage(TestClass);
 			FInflightGraphEditor_ClassData NewData(TestClass, DeprecatedMessage);
 
-			NewData.bHideParent = IsHidingParentClass(TestClass);
-			if (NewData.bHideParent)
+			NewData.HideParent = IsHidingParentClass(TestClass);
+			if (NewData.HideParent)
 			{
 				HideParentList.Add(TestClass->GetSuperClass());
 			}
 
-			NewData.bIsHidden = IsHidingClass(TestClass);
+			NewData.IsHidden = IsHidingClass(TestClass);
 
 			NewNode->Data = NewData;
 
@@ -425,7 +421,7 @@ void FInflightGraphEditor_ClassHelper::BuildClassGraph()
 		const TSharedPtr<FInflightGraphEditor_ClassNode> TestNode = NodeList[i];
 		if (HideParentList.Contains(TestNode->Data.GetClass()))
 		{
-			TestNode->Data.bIsHidden = true;
+			TestNode->Data.IsHidden = true;
 		}
 	}
 

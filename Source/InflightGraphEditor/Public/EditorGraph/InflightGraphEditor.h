@@ -6,22 +6,20 @@
 #include "EdGraph/EdGraph.h"
 #include "InflightGraphEditor.generated.h"
 
+class UInflightGraph;
+
 /**
  *
  */
-class UInflightGraph;
-
 UCLASS()
 class UInflightGraphEditor : public UEdGraph
 {
 	GENERATED_BODY()
 
 public:
-	virtual bool IsNameUnique(const FText& InName);
 	virtual void SaveGraph();
 	virtual void ClearOldLinks();
 	virtual void LinkAssetNodes();
 	virtual void RefreshNodes();
-	virtual void MapNamedNodes();
 	virtual UInflightGraph* GetGraphAsset();
 };

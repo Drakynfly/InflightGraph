@@ -30,42 +30,9 @@ FText UInflightGraphNode::GetNodeTitle_Implementation()
 	return DefaultNodeTitle.IsEmpty() ? LOCTEXT("Node Title", "Node") : DefaultNodeTitle;
 }
 
-TArray<UInflightGraphNode*> UInflightGraphNode::GetChildren()
-{
-	TArray<UInflightGraphNode*>ReturnArray;
-	for (UInflightGraphNode* Node : ChildNodes)
-	{
-		if (auto&& Object = Node->GetNodePointer())
-		{
-			ReturnArray.Add(Object);
-		}
-	}
-	return ReturnArray;
-}
-
 TArray<UInflightGraphNode*> UInflightGraphNode::GetParents()
 {
 	return ParentNodes;
-}
-
-bool UInflightGraphNode::HasInputPins_Implementation()
-{
-	return bHasInputPins;
-}
-
-bool UInflightGraphNode::HasOutputPins_Implementation()
-{
-	return bHasOutputPins;
-}
-
-void UInflightGraphNode::AddToChildren(UInflightGraphNode* NewSubNode)
-{
-	ChildNodes.Add(NewSubNode);
-}
-
-void UInflightGraphNode::AddToParent(UInflightGraphNode* NewParentNode)
-{
-	ParentNodes.Add(NewParentNode);
 }
 
 bool UInflightGraphNode::HasParentNodes()
@@ -75,14 +42,14 @@ bool UInflightGraphNode::HasParentNodes()
 
 void UInflightGraphNode::LinkArgumentNodeAsChild(UInflightGraphNode* Child)
 {
-	AddToChildren(Child);
-	Child->AddToParent(this);
+	Child->ParentNodes.Add(this);
+
+	// Children of this node class must override this to save their own list of children.
 }
 
 void UInflightGraphNode::ClearLinks()
 {
 	ParentNodes.Empty();
-	ChildNodes.Empty();
 }
 
 bool UInflightGraphNode::RemoveLinkedNode(UInflightGraphNode* NodeToRemove)
@@ -97,7 +64,8 @@ bool UInflightGraphNode::RemoveNodeFromParents(UInflightGraphNode* NodeToRemove)
 
 bool UInflightGraphNode::RemoveNodeFromChildren(UInflightGraphNode* NodeToRemove)
 {
-	return ChildNodes.Remove(NodeToRemove) != 0;
+	// Children of this node class must override this to remove from own list of children.
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -29,10 +29,10 @@ struct FInflightGraphEditor_ClassData
 	FORCEINLINE FString GetPackageName() const { return GeneratedClassPackage; }
 
 	/** set when child class masked this one out (e.g. always use game specific class instead of engine one) */
-	uint32 bIsHidden : 1;
+	bool IsHidden = false;
 
 	/** set when class wants to hide parent class from selection (just one class up hierarchy) */
-	uint32 bHideParent : 1;
+	bool HideParent = false;
 
 private:
 

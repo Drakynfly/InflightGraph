@@ -17,9 +17,6 @@ public:
 	virtual void UpdateGraphNode() override;
 	virtual void CreatePinWidgets() override;
 	virtual void AddPin(const TSharedRef<SGraphPin>& PinToAdd) override;
-	virtual bool IsNameReadOnly() const override;
-
-	void OnNameTextCommited(const FText& InText, ETextCommit::Type CommitInfo);
 
 	void Construct(const FArguments& InArgs, UEdGraphNode* InNode);
 

@@ -10,7 +10,7 @@ class UInflightGraph;
 /**
  * Base abstract class for every node of the graph.
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class INFLIGHTGRAPHRUNTIME_API UInflightGraphNode : public UObject
 {
 	GENERATED_BODY()
@@ -18,30 +18,8 @@ class INFLIGHTGRAPHRUNTIME_API UInflightGraphNode : public UObject
 public:
 	UInflightGraphNode();
 
-	UFUNCTION(BlueprintPure, Category = "Node Data")
-	TArray<UInflightGraphNode*> GetChildren();
-
-	UFUNCTION(BlueprintPure, Category = "Node Data")
-	TArray<UInflightGraphNode*> GetParents();
-
-    UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Node Data")
-	FText GetNodeTitle();
-    virtual FText GetNodeTitle_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Node Data")
-	bool HasInputPins();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Node Data")
-	bool HasOutputPins();
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Node Data")
-	UInflightGraphNode* GetNodePointer();
-    virtual UInflightGraphNode* GetNodePointer_Implementation();
-
 	virtual void SetGraph(UInflightGraph* InGraph);
 	virtual UInflightGraph* GetGraph();
-	virtual void AddToChildren(UInflightGraphNode* NewChildNode);
-	virtual void AddToParent(UInflightGraphNode* NewParentNode);
 	virtual bool HasParentNodes();
 	virtual void LinkArgumentNodeAsChild(UInflightGraphNode* Child);
 	virtual void ClearLinks();
@@ -49,21 +27,28 @@ public:
 	virtual bool RemoveNodeFromParents(UInflightGraphNode* NodeToRemove);
 	virtual bool RemoveNodeFromChildren(UInflightGraphNode* NodeToRemove);
 
+	// @todo these should not be in runtime. these should be in editor.
+	virtual bool HasInputPins() const { return true; }
+	virtual bool HasOutputPins() const { return true; }
+
+	UFUNCTION(BlueprintPure, Category = "Node Data")
+	TArray<UInflightGraphNode*> GetParents();
+
+	// @todo this should not be in runtime. this should be in editor.
+    UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "Node Data")
+	FText GetNodeTitle();
+    virtual FText GetNodeTitle_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Node Data")
+	UInflightGraphNode* GetNodePointer();
+    virtual UInflightGraphNode* GetNodePointer_Implementation();
+
 protected:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UInflightGraph> Graph = nullptr;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UInflightGraphNode>> ParentNodes;
-
-	UPROPERTY()
-	TArray<TObjectPtr<UInflightGraphNode>> ChildNodes;
-
-    UPROPERTY()
-	bool bHasInputPins = true;
-
-    UPROPERTY()
-	bool bHasOutputPins = true;
 
     UPROPERTY()
 	FText DefaultNodeTitle = FText();

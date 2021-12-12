@@ -2,14 +2,23 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 /**
  *
  */
 class INFLIGHTEDITOR_API FInflightGraphStyle
 {
 public:
+
+	/** Styling for Inflight Graph Nodes */
+	class FNode
+	{
+	public:
+		static const FLinearColor Start;
+		static const FLinearColor State;
+		static const FLinearColor Input;
+	};
+
+	/** Styling for Inflight Graph Node Pins */
 	class FPin
 	{
 	public:

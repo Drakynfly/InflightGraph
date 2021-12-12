@@ -5,16 +5,15 @@
 #include "GraphEditorSettings.h"
 #include "SGraphPin.h"
 #include "SCommentBubble.h"
-
-#include "EditorGraph/EditorNodes/InflightGraphNodeEditor.h"
+#include "EditorGraph/EditorNodes/InflightEditorGraphNode.h"
 #include "EditorGraph/SlateWidgets/SInflightGraphPin.h"
 #include "Utility/InflightGraph_Log.h"
 
 #define LOCTEXT_NAMESPACE "SInflightGraphNode"
 
-class UInflightGraphNodeEditor;
+class UInflightEditorGraphNode;
 
-void SInflightGraphNode::Construct(const FArguments & InArgs, UEdGraphNode* InNode)
+void SInflightGraphNode::Construct(const FArguments& InArgs, UEdGraphNode* InNode)
 {
 	GraphNode = InNode;
 	UpdateGraphNode();
@@ -33,6 +32,9 @@ void SInflightGraphNode::UpdateGraphNode()
 	const TSharedPtr<SNodeTitle> NodeTitle = SNew(SNodeTitle, GraphNode);
 	TSharedPtr<SErrorText> ErrorText;
 
+	const FLinearColor NodeFullColor = GraphNode->GetNodeBodyTintColor();
+	const FLinearColor NodeHalfColor = NodeFullColor/2;
+
 	this->ContentScale.Bind(this, &SGraphNode::GetContentScale);
 
 	this->GetOrAddSlot(ENodeZone::Center)
@@ -42,7 +44,7 @@ void SInflightGraphNode::UpdateGraphNode()
 			SNew(SBorder)
 			.BorderImage(FEditorStyle::GetBrush("Graph.StateNode.Body"))
 			.Padding(FMargin(1.f, 5.0f))
-			.BorderBackgroundColor(FLinearColor(0.1f, 0.1f, 0.1f))
+			.BorderBackgroundColor(NodeFullColor)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
@@ -56,7 +58,7 @@ void SInflightGraphNode::UpdateGraphNode()
 					SNew(SBorder)
                     .BorderImage(FEditorStyle::GetBrush("Graph.StateNode.Body"))
                     .Padding(FMargin(5.0f))
-                    .BorderBackgroundColor(FLinearColor(0.1f, 0.1f, 0.4f))
+                    .BorderBackgroundColor(NodeHalfColor)
                     [
 						SNew(SVerticalBox)
 						+ SVerticalBox::Slot()
@@ -73,7 +75,6 @@ void SInflightGraphNode::UpdateGraphNode()
 							.Style(FEditorStyle::Get(), "Graph.StateNode.NodeTitleInlineEditableText")
 							.Text(NodeTitle.Get(), &SNodeTitle::GetHeadTitle)
 							.IsReadOnly(this, &SInflightGraphNode::IsNameReadOnly)
-							.OnTextCommitted(this, &SInflightGraphNode::OnNameTextCommited)
 							.OnVerifyTextChanged(this, &SInflightGraphNode::OnVerifyNameTextChanged)
 						]
 						+ SVerticalBox::Slot()
@@ -89,7 +90,6 @@ void SInflightGraphNode::UpdateGraphNode()
 						+ SVerticalBox::Slot()
 						.AutoHeight()
 						[
-							// 错误提示
 							SAssignNew(ErrorText, SErrorText)
 							.BackgroundColor(this, &SInflightGraphNode::GetErrorColor)
 							.ToolTipText(this, &SInflightGraphNode::GetErrorMsgToolTip)
@@ -104,7 +104,6 @@ void SInflightGraphNode::UpdateGraphNode()
 			]
 		];
 
-	//注释用的气泡
 	TSharedPtr<SCommentBubble> CommentBubble;
 	const FSlateColor CommentColor = GetDefault<UGraphEditorSettings>()->DefaultCommentNodeTitleColor;
 
@@ -139,7 +138,7 @@ void SInflightGraphNode::UpdateGraphNode()
 
 void SInflightGraphNode::CreatePinWidgets()
 {
-	UInflightGraphNodeEditor* EdNode = CastChecked<UInflightGraphNodeEditor>(GraphNode);
+	UInflightEditorGraphNode* EdNode = CastChecked<UInflightEditorGraphNode>(GraphNode);
 	for (int32 i = 0; i < EdNode->Pins.Num(); ++i)
 	{
 		UEdGraphPin* Pin = EdNode->Pins[i];
@@ -180,28 +179,9 @@ void SInflightGraphNode::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 	}
 }
 
-bool SInflightGraphNode::IsNameReadOnly() const
-{
-	return false;
-}
-
-void SInflightGraphNode::OnNameTextCommited(const FText & InText, const ETextCommit::Type CommitInfo)
-{
-	UInflightGraphNodeEditor* UEdNode = CastChecked<UInflightGraphNodeEditor>(GraphNode);
-
-	if (UEdNode)
-		if (UEdNode->RenameUniqueNode(InText))
-		{
-			UpdateGraphNode();
-            NodeHeader.Get()->SetVisibility(EVisibility::Visible);
-			SGraphNode::OnNameTextCommited(InText, CommitInfo);
-		}
-
-}
-
 void SInflightGraphNode::CreateContent()
 {
-	UInflightGraphNodeEditor* Node = Cast<UInflightGraphNodeEditor>(GraphNode);
+	UInflightEditorGraphNode* Node = Cast<UInflightEditorGraphNode>(GraphNode);
 
 	ContentWidget->SetContent(Node->GetContentWidget().ToSharedRef());
 	ContentWidget->SetMinDesiredWidth(200.f);
@@ -211,11 +191,11 @@ void SInflightGraphNode::CreateHeader()
 {
     NodeHeader.Get()->SetText(GraphNode->GetNodeTitle(ENodeTitleType::MenuTitle));
 
-    UInflightGraphNodeEditor* UEdNode = CastChecked<UInflightGraphNodeEditor>(GraphNode);
-
-    if (UEdNode)
+    if (const UInflightEditorGraphNode* UEdNode = CastChecked<UInflightEditorGraphNode>(GraphNode))
     {
-		NodeHeader.Get()->SetVisibility((UEdNode->GetEdNodeName().IsEmpty()) ? EVisibility::Collapsed : EVisibility::Visible);
+    	NodeHeader.Get()->SetVisibility(EVisibility::Visible);
+
+		//NodeHeader.Get()->SetVisibility(UEdNode->GetEdNodeName().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible);
     }
     else
     {

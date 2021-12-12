@@ -1,23 +1,26 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "EdGraph/EdGraphNode.h"
 #include "Nodes/InflightGraphNode.h"
-#include "InflightGraphNodeEditor.generated.h"
+
+// ReSharper disable once CppUnusedIncludeDirective
+// Used by most children, so included here for sanity
+#include "Utility/InflightGraphStyle.h"
+
+#include "InflightEditorGraphNode.generated.h"
 
 /**
  *
  */
 UCLASS()
-class UInflightGraphNodeEditor : public UEdGraphNode
+class INFLIGHTEDITOR_API UInflightEditorGraphNode : public UEdGraphNode
 {
 	GENERATED_BODY()
 
 public:
-	UInflightGraphNodeEditor(const FObjectInitializer& ObjectInitializer);
+	UInflightEditorGraphNode(const FObjectInitializer& ObjectInitializer);
 
 	// Inherited via EdGraphNode.h
 	virtual TSharedPtr<SGraphNode> CreateVisualWidget() override; 	/** Create a visual widget to represent this node in a graph editor or graph panel.  If not implemented, the default node factory will be used. */
@@ -27,28 +30,30 @@ public:
 	virtual void DestroyNode() override;
 	virtual void AutowireNewNode(UEdGraphPin* FromPin) override;
 	virtual void GetNodeContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const override;
+	virtual bool GetCanRenameNode() const override { return false; }
 
 public:
+	virtual bool AllowConnection(UInflightEditorGraphNode* Other, EEdGraphPinDirection OthersDirection, FText& OutErrorReason) { return true; }
+
 	virtual void SetAssetNode(UInflightGraphNode* InNode);
 	virtual UInflightGraphNode* GetAssetNode();
 
 	virtual void PostCopyNode();
-
-	virtual bool RenameUniqueNode(const FText& NewName);
-
-	virtual FText GetEdNodeName() const;
-	virtual void SetEdNodeName(const FText& Name);
-	virtual void SetEdNodeName(const FName& Name);
 
 	virtual TSharedPtr<SWidget> GetContentWidget();
 
 	virtual void UpdateVisualNode();
 
     virtual void SaveNodesAsChildren(TArray<UEdGraphNode*>& Children);
+
+	bool BlueprintNode = false;
+
 protected:
 	virtual bool HasOutputPins();
 	virtual bool HasInputPins();
-	TSharedPtr<SGraphNode>SlateNode;
+
+	TSharedPtr<SGraphNode> SlateNode;
+
 public:
 	UPROPERTY(Instanced)
 	UInflightGraphNode* AssetNode = nullptr;
@@ -56,5 +61,4 @@ public:
 protected:
 	UPROPERTY()
 	FText EdNodeName;
-
 };

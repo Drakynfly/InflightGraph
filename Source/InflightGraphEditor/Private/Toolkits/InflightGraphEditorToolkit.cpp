@@ -11,7 +11,7 @@
 #include "Graphs/InflightGraph.h"
 #include "EditorGraph/InflightEditorGraphSchema.h"
 #include "EditorGraph/InflightGraphEditor.h"
-#include "EditorGraph/EditorNodes/InflightGraphNodeEditor.h"
+#include "EditorGraph/EditorNodes/InflightEditorGraphNode.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Utility/InflightGraph_Log.h"
 
@@ -38,7 +38,6 @@ FGraphPanelSelectionSet FInflightGraphEditorToolkit::GetSelectedNodes() const
 
 TSharedRef<SDockTab> FInflightGraphEditorToolkit::HandleTabManagerSpawnTabDetails(const FSpawnTabArgs & Args)
 {
-
 	FDetailsViewArgs DetailsViewArgs;
 	DetailsViewArgs.bUpdatesFromSelection = false;
 	DetailsViewArgs.bCustomNameAreaLocation = false;
@@ -119,26 +118,20 @@ void FInflightGraphEditorToolkit::InitGraphAssetEditor(const EToolkitMode::Type 
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()
-			->SetOrientation(Orient_Vertical)
+			->SetOrientation(Orient_Horizontal)
 			->Split
 			(
-				FTabManager::NewSplitter()
-				->SetOrientation(Orient_Horizontal)
-				->SetSizeCoefficient(0.8f)
-				->Split
-				(
-					FTabManager::NewStack()
-					->AddTab(DetailsTabId, ETabState::OpenedTab)
-					->SetHideTabWell(true)
-					->SetSizeCoefficient(0.15f)
-				)
-				->Split
-				(
-					FTabManager::NewStack()
-					->AddTab(GraphTabId, ETabState::OpenedTab)
-					->SetHideTabWell(true)
-					->SetSizeCoefficient(0.85f)
-				)
+				FTabManager::NewStack()
+				->AddTab(DetailsTabId, ETabState::OpenedTab)
+				->SetHideTabWell(true)
+				->SetSizeCoefficient(0.15f)
+			)
+			->Split
+			(
+				FTabManager::NewStack()
+				->AddTab(GraphTabId, ETabState::OpenedTab)
+				->SetHideTabWell(true)
+				->SetSizeCoefficient(0.85f)
 			)
 		);
 
@@ -242,7 +235,9 @@ void FInflightGraphEditorToolkit::BindToolkitCommands()
 void FInflightGraphEditorToolkit::OnCommandSelectAllNodes()
 {
 	if (EdGraphEditor.IsValid())
+	{
 		EdGraphEditor->SelectAllNodes();
+	}
 }
 
 bool FInflightGraphEditorToolkit::CanSelectAllNodes()
@@ -252,6 +247,8 @@ bool FInflightGraphEditorToolkit::CanSelectAllNodes()
 
 void FInflightGraphEditorToolkit::OnCommandCut()
 {
+	const FScopedTransaction Transaction(FGenericCommands::Get().Cut->GetDescription());
+
 	OnCommandCopy();
 
 	const FGraphPanelSelectionSet OldSelectedNodes = EdGraphEditor->GetSelectedNodes();
@@ -271,9 +268,10 @@ void FInflightGraphEditorToolkit::OnCommandCut()
 
 	for (FGraphPanelSelectionSet::TConstIterator It(OldSelectedNodes); It; ++It)
 	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*It);
-		if (Node)
+		if (UEdGraphNode* Node = Cast<UEdGraphNode>(*It))
+		{
 			EdGraphEditor->SetNodeSelection(Node, true);
+		}
 	}
 }
 
@@ -287,23 +285,27 @@ void FInflightGraphEditorToolkit::OnCommandCopy()
 	FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
 	FString ExportedText;
 
-	for (FGraphPanelSelectionSet::TIterator it(SelectedNodes); it; ++it)
+	for (FGraphPanelSelectionSet::TIterator It(SelectedNodes); It; ++It)
 	{
-		UEdGraphNode* Node = Cast<UEdGraphNode>(*it);
-		if (Node)
+		if (UEdGraphNode* Node = Cast<UEdGraphNode>(*It))
+		{
 			Node->PrepareForCopying();
+		}
 		else
-			it.RemoveCurrent();
+		{
+			It.RemoveCurrent();
+		}
 	}
 
 	FEdGraphUtilities::ExportNodesToText(SelectedNodes, ExportedText);
 	FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
 
-	for (FGraphPanelSelectionSet::TIterator it(SelectedNodes); it; ++it)
+	for (FGraphPanelSelectionSet::TIterator It(SelectedNodes); It; ++It)
 	{
-		UInflightGraphNodeEditor* Node = Cast<UInflightGraphNodeEditor>(*it);
-		if (Node)
+		if (UInflightEditorGraphNode* Node = Cast<UInflightEditorGraphNode>(*It))
+		{
 			Node->PostCopyNode();
+		}
 	}
 }
 
@@ -314,6 +316,7 @@ bool FInflightGraphEditorToolkit::CanCopyNodes()
 
 void FInflightGraphEditorToolkit::OnCommandPaste()
 {
+	const FScopedTransaction Transaction(FGenericCommands::Get().Paste->GetDescription());
 
 	const FVector2D PasteLocation = EdGraphEditor->GetPasteLocation();
 
@@ -328,7 +331,7 @@ void FInflightGraphEditorToolkit::OnCommandPaste()
 
 	for (TSet<UEdGraphNode*>::TIterator It(ImportedNodes); It; ++It)
 	{
-		UInflightGraphNodeEditor* Node = Cast<UInflightGraphNodeEditor>(*It);
+		UInflightEditorGraphNode* Node = Cast<UInflightEditorGraphNode>(*It);
 		GraphAsset->AddNode(Node->AssetNode);
 	}
 
@@ -336,12 +339,12 @@ void FInflightGraphEditorToolkit::OnCommandPaste()
 
 	for (TSet<UEdGraphNode*>::TIterator It(ImportedNodes); It; ++It)
 	{
-		UEdGraphNode* Node = *It;
+		const UEdGraphNode* Node = *It;
 		AvgNodePosition.X += Node->NodePosX;
 		AvgNodePosition.Y += Node->NodePosY;
 	}
 
-	float InvNumNodes = 1.0f / float(ImportedNodes.Num());
+	const float InvNumNodes = 1.0f / static_cast<float>(ImportedNodes.Num());
 	AvgNodePosition.X *= InvNumNodes;
 	AvgNodePosition.Y *= InvNumNodes;
 
@@ -361,9 +364,7 @@ void FInflightGraphEditorToolkit::OnCommandPaste()
 
 	EdGraphEditor->NotifyGraphChanged();
 
-	UObject* GraphOwner;
-	GraphOwner = EdGraph->GetOuter();
-	if (GraphOwner)
+	if (UObject* GraphOwner = EdGraph->GetOuter())
 	{
 		GraphOwner->PostEditChange();
 		// ReSharper disable once CppExpressionWithoutSideEffects
@@ -390,6 +391,7 @@ bool FInflightGraphEditorToolkit::CanDuplicateNodes()
 
 void FInflightGraphEditorToolkit::OnCommandDelete()
 {
+	const FScopedTransaction Transaction(FGenericCommands::Get().Delete->GetDescription());
 	EdGraphEditor->GetCurrentGraph()->Modify();
 
 	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
@@ -399,8 +401,11 @@ void FInflightGraphEditorToolkit::OnCommandDelete()
 	{
 		if (UEdGraphNode* Node = Cast<UEdGraphNode>(*It))
 		{
-			Node->Modify();
-			Node->DestroyNode();
+			if (Node->CanUserDeleteNode())
+			{
+				Node->Modify();
+				Node->DestroyNode();
+			}
 		}
 	}
 }

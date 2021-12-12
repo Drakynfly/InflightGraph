@@ -14,7 +14,7 @@ FInflightGraph_AssetTypeActions::FInflightGraph_AssetTypeActions()
 
 FText FInflightGraph_AssetTypeActions::GetName() const
 {
-	return NSLOCTEXT("AssetTypeActions", "GraphTypeActions", "InflightGraphEditor");
+	return LOCTEXT("Name", "Inflight Graph");
 }
 
 UClass* FInflightGraph_AssetTypeActions::GetSupportedClass() const
@@ -24,7 +24,7 @@ UClass* FInflightGraph_AssetTypeActions::GetSupportedClass() const
 
 FColor FInflightGraph_AssetTypeActions::GetTypeColor() const
 {
-	return FColor::Red;
+	return FColor::Emerald;
 }
 
 uint32 FInflightGraph_AssetTypeActions::GetCategories()
@@ -39,14 +39,13 @@ bool FInflightGraph_AssetTypeActions::HasActions(const TArray<UObject*>& InObjec
 
 void FInflightGraph_AssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, const TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
 {
-	FInflightEditorModule& Helper= FModuleManager::LoadModuleChecked<FInflightEditorModule>("InflightEditor");
+	FInflightEditorModule& Helper = FModuleManager::LoadModuleChecked<FInflightEditorModule>("InflightEditor");
 	Helper.StartNodeHelper();
 
 	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
-	for (auto Object = InObjects.CreateConstIterator(); Object; ++Object)
+	for (auto&& Object = InObjects.CreateConstIterator(); Object; ++Object)
 	{
-		UInflightGraph* const Graph = Cast<UInflightGraph>(*Object);
-		if (Graph != nullptr)
+		if (UInflightGraph* const Graph = Cast<UInflightGraph>(*Object))
 		{
 			const TSharedRef<FInflightGraphEditorToolkit>EditorToolkit = MakeShareable(new FInflightGraphEditorToolkit());
 			EditorToolkit->InitGraphAssetEditor(Mode, EditWithinLevelEditor, Graph);
