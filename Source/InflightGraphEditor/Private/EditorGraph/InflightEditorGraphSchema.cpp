@@ -1,15 +1,11 @@
 ﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "EditorGraph/InflightEditorGraphSchema.h"
-#include "EdGraph/EdGraph.h"
 #include "Module/InflightEditor.h"
 #include "Graphs/InflightGraph.h"
-#include "Nodes/InflightGraphNode.h"
 #include "EditorGraph/InflightGraphEditorConnectionDrawingPolicy.h"
-#include "EditorGraph/EditorNodes/InflightEditorGraphNode.h"
 #include "EditorGraph/EditorNodes/InflightEditorStartNode.h"
 #include "EditorGraph/SchemaActions/InflightGraphSchemaAction_NewState.h"
-#include "Nodes/InflightStartNode.h"
 #include "Utility/InflightGraphEditor_ClassHelper.h"
 
 #define LOCTEXT_NAMESPACE "InflightEditorGraphSchema"
@@ -100,7 +96,7 @@ const FPinConnectionResponse UInflightEditorGraphSchema::CanCreateConnection(con
 
 FConnectionDrawingPolicy* UInflightEditorGraphSchema::CreateConnectionDrawingPolicy(const int32 InBackLayerID,
 	const int32 InFrontLayerID, const float InZoomFactor, const FSlateRect & InClippingRect,
-	FSlateWindowElementList & InDrawElements, UEdGraph* InGraphObj) const
+	FSlateWindowElementList& InDrawElements, UEdGraph* InGraphObj) const
 {
 	return new FInflightGraphEditorConnectionDrawingPolicy(InBackLayerID, InFrontLayerID, InZoomFactor, InClippingRect, InDrawElements, InGraphObj);
 }
@@ -109,23 +105,25 @@ void UInflightEditorGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) con
 {
 	if (Graph.Nodes.Num() == 0)
 	{
-		UInflightGraph* GraphAsset = Cast<UInflightGraph>(Graph.GetOuter());
-
-		GraphAsset->Modify();
-		Graph.Modify();
+		// Create the runtime start node
+		// @todo where do the runtime nodes go? if this is a class there is no UInflightGraph yet to put them in
+		UInflightGraphBlueprint* GraphAsset = Cast<UInflightGraphBlueprint>(Graph.GetOuter());
 
 		UInflightStartNode* StartingNode = GraphAsset->SpawnNodeInsideGraph<UInflightStartNode>(UInflightStartNode::StaticClass());
 
+		// Create the editor start node
 		FGraphNodeCreator<UInflightEditorStartNode> Creator(Graph);
 		UInflightEditorStartNode* EdNode = Creator.CreateNode();
-		EdNode->SetAssetNode(StartingNode);
 		EdNode->AllocateDefaultPins();
+		EdNode->NodePosX = 0;
+		EdNode->NodePosY = 0;
+
+		// Link the runtime and editor start nodes
+		EdNode->SetAssetNode(StartingNode);
 		GraphAsset->SetStartNode(StartingNode);
 
 		Creator.Finalize();
-
-		EdNode->NodePosX = 0;
-		EdNode->NodePosY = 0;
 	}
 }
+
 #undef LOCTEXT_NAMESPACE

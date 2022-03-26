@@ -79,7 +79,7 @@ void UInflightGraphEditor::RefreshNodes()
 	}
 }
 
-UInflightGraph* UInflightGraphEditor::GetGraphAsset()
+UInflightGraphBlueprint* UInflightGraphEditor::GetGraphBlueprint()
 {
-	return Cast<UInflightGraph>(GetOuter());
+	return Cast<UInflightGraphBlueprint>(GetOuter());
 }

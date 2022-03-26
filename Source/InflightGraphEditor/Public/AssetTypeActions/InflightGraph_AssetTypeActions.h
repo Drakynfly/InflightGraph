@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "AssetTypeActions_Base.h"
+#include "AssetTypeActions/AssetTypeActions_Blueprint.h"
 
 /**
  *
  */
-class FInflightGraph_AssetTypeActions : public FAssetTypeActions_Base
+class FInflightGraph_AssetTypeActions : public FAssetTypeActions_Blueprint
 {
 public:
 	FInflightGraph_AssetTypeActions();
@@ -17,6 +17,7 @@ public:
 	virtual UClass* GetSupportedClass() const override;
 	virtual FColor GetTypeColor() const override;
 	virtual uint32 GetCategories() override;
-	virtual bool HasActions(const TArray<UObject*>& InObjects) const override;
 	virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
+
+	virtual UFactory* GetFactoryForBlueprintType(UBlueprint* InBlueprint) const override;
 };

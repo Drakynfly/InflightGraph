@@ -4,6 +4,8 @@
 
 #include "Modules/ModuleManager.h"
 
+struct FInflightGraphEditor_ClassHelper;
+
 class FInflightEditorModule : public IModuleInterface
 {
 public:
@@ -12,9 +14,8 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	virtual void StartNodeHelper();
-	virtual TSharedPtr<struct FInflightGraphEditor_ClassHelper> GetHelper() { return NodeHelper; }
+	virtual TSharedPtr<FInflightGraphEditor_ClassHelper> GetHelper();
 
 private:
-	TSharedPtr<struct FInflightGraphEditor_ClassHelper> NodeHelper;
+	TSharedPtr<FInflightGraphEditor_ClassHelper> NodeHelper;
 };

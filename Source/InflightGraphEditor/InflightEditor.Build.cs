@@ -12,7 +12,9 @@ public class InflightEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new []
 			{
-				"Core"
+				"Core",
+				"Kismet",
+				"AssetTools"
 			});
 
 		PrivateDependencyModuleNames.AddRange(

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a1a7f414-03a7-41b3-aa96-98ea29982576" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Factories/InflightGraphBlueprintFactory.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Factories/InflightGraphBlueprintFactory.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/InflightEditor.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/InflightEditor.Build.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/AssetTypeActions/InflightGraph_AssetTypeActions.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/AssetTypeActions/InflightGraph_AssetTypeActions.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/EditorNodes/InflightEditorGraphNode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/EditorNodes/InflightEditorGraphNode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/InflightEditorGraphSchema.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/InflightEditorGraphSchema.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/InflightGraphEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/InflightGraphEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/SchemaActions/InflightGraphSchemaAction_NewState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/EditorGraph/SchemaActions/InflightGraphSchemaAction_NewState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Factories/InflightGraph_AssetFactory.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Module/InflightEditor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Module/InflightEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Toolkits/InflightGraphEditorToolkit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Private/Toolkits/InflightGraphBlueprintEditor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/AssetTypeActions/InflightGraph_AssetTypeActions.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/AssetTypeActions/InflightGraph_AssetTypeActions.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/EditorGraph/InflightEditorGraphSchema.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/EditorGraph/InflightEditorGraphSchema.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/EditorGraph/InflightGraphEditor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/EditorGraph/InflightGraphEditor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Factories/InflightGraph_AssetFactory.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Module/InflightEditor.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Module/InflightEditor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Toolkits/InflightGraphEditorToolkit.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphEditor/Public/Toolkits/InflightGraphBlueprintEditor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphRuntime/Private/Graphs/InflightGraph.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphRuntime/Private/Graphs/InflightGraph.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphRuntime/Private/Nodes/InflightGraphNode.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphRuntime/Private/Nodes/InflightGraphNode.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphRuntime/Public/Graphs/InflightGraph.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphRuntime/Public/Graphs/InflightGraph.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/InflightGraphRuntime/Public/Nodes/InflightGraphNode.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/InflightGraphRuntime/Public/Nodes/InflightGraphNode.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="26dbIis64FMZaCLQ2v05g3UypQs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a1a7f414-03a7-41b3-aa96-98ea29982576" name="Changes" comment="" />
+      <created>1647756335470</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1647756335470</updated>
+      <workItem from="1647756338483" duration="3000" />
+    </task>
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

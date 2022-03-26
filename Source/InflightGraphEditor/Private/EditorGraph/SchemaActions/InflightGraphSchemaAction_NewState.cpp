@@ -15,7 +15,7 @@ UEdGraphNode* FInflightGraphSchemaAction::PerformAction(UEdGraph* ParentGraph, U
 
 	ParentGraph->Modify();
 
-	UInflightGraph* GraphAsset = CastChecked<UInflightGraph>(ParentGraph->GetOuter());
+	UInflightGraphBlueprint* GraphAsset = CastChecked<UInflightGraphBlueprint>(ParentGraph->GetOuter());
 	GraphAsset->Modify();
 
 	UInflightGraphNode* AssetNode = GraphAsset->SpawnNodeInsideGraph<UInflightGraphNode>(NewNodeClass);

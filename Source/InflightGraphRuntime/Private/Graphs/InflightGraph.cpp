@@ -1,10 +1,71 @@
 ﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "Graphs/InflightGraph.h"
+
+#include "InflightGraphEditor/Public/AssetTypeActions/InflightGraph_AssetTypeActions.h"
 #include "Nodes/InflightGraphNode.h"
 #include "UObject/ObjectSaveContext.h"
 
 #define LOCTEXT_NAMESPACE "InflightGraph"
+
+#if WITH_EDITOR
+
+void UInflightGraphBlueprint::SetStartNode(UInflightStartNode* StartingNode)
+{
+	StartNode = StartingNode;
+}
+
+void UInflightGraphBlueprint::AddNode(UInflightGraphNode* InNode)
+{
+	InNode->SetGraphBlueprint(this);
+	InNode->Rename(nullptr, this);
+	int32 Index = Nodes.Add(InNode);
+}
+
+void UInflightGraphBlueprint::RemoveNode(UInflightGraphNode* NodeToRemove)
+{
+	for (UInflightGraphNode* Node : Nodes)
+	{
+		Node->RemoveLinkedNode(NodeToRemove);
+	}
+
+	int32 Removed = Nodes.Remove(NodeToRemove);
+}
+
+void UInflightGraphBlueprint::SetInflightGraph(UEdGraph* EdGraph)
+{
+	InflightEditorGraph = EdGraph;
+}
+#endif
+
+UInflightGraphBlueprint* UInflightGraphBlueprint::FindRootInflightGraphBlueprint(const UInflightGraphBlueprint* DerivedBlueprint)
+{
+	UInflightGraphBlueprint* ParentBP = nullptr;
+
+	// Determine if there is an anim blueprint in the ancestry of this class
+	for (UClass* ParentClass = DerivedBlueprint->ParentClass; ParentClass && (UObject::StaticClass() != ParentClass); ParentClass = ParentClass->GetSuperClass())
+	{
+		if (UInflightGraphBlueprint* TestBP = Cast<UInflightGraphBlueprint>(ParentClass->ClassGeneratedBy))
+		{
+			ParentBP = TestBP;
+		}
+	}
+
+	return ParentBP;
+}
+
+UInflightGraphBlueprint* UInflightGraphBlueprint::GetParentInflightGraphBlueprint(const UInflightGraphBlueprint* DerivedBlueprint)
+{
+	UInflightGraphBlueprint* ParentBP = nullptr;
+	UClass* ParentClass = DerivedBlueprint->ParentClass;
+
+	if (UInflightGraphBlueprint* TestBP = Cast<UInflightGraphBlueprint>(ParentClass->ClassGeneratedBy))
+	{
+		ParentBP = TestBP;
+	}
+
+	return ParentBP;
+}
 
 UInflightGraph::UInflightGraph()
 {
@@ -29,19 +90,27 @@ void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
 	UObject::PreSave(SaveContext);
 }
 
-void UInflightGraph::InitGraph(APawn* Agent)
+UInflightGraph* UInflightGraph::CreateInflightGraph(const TSubclassOf<UInflightGraph> Class, APawn* Agent, const bool BeginGraphAfterCreation)
 {
-	checkf(Agent, TEXT("Don't pass in a null agent please."));
-
-	RunningAgent = Agent;
-
-	// @todo remove this eventually. right now inflight graphs are referenced as asset, which requires this reset
-	if (ActiveStateNode)
+	if (!IsValid(Class))
 	{
-		ActiveStateNode->SetInactive();
-		ActiveStateNode = nullptr;
+		return nullptr;
 	}
 
+	UInflightGraph* NewGraph = NewObject<UInflightGraph>(Agent, Class);
+
+	NewGraph->RunningAgent = Agent;
+
+	if (BeginGraphAfterCreation)
+	{
+		NewGraph->BeginGraph();
+	}
+
+	return NewGraph;
+}
+
+void UInflightGraph::BeginGraph()
+{
 	if (UInflightStateNode* InitialState = Cast<UInflightStateNode>(StartNode->GetConnectedState()))
 	{
 		SwitchActiveState(InitialState);
@@ -51,31 +120,6 @@ void UInflightGraph::InitGraph(APawn* Agent)
 		UE_LOG(LogInflightGraph, Error, TEXT("No Initial State Connected!"))
 	}
 }
-
-#if WITH_EDITORONLY_DATA
-
-void UInflightGraph::SetStartNode(UInflightStartNode* StartingNode)
-{
-	StartNode = StartingNode;
-}
-
-void UInflightGraph::AddNode(UInflightGraphNode* InNode)
-{
-	InNode->SetGraph(this);
-	InNode->Rename(nullptr, this);
-	int32 Index = Nodes.Add(InNode);
-}
-
-void UInflightGraph::RemoveNode(UInflightGraphNode* NodeToRemove)
-{
-	for (UInflightGraphNode* Node : Nodes)
-	{
-		Node->RemoveLinkedNode(NodeToRemove);
-	}
-
-	int32 Removed = Nodes.Remove(NodeToRemove);
-}
-#endif
 
 void UInflightGraph::SwitchActiveState(UInflightStateNode* NewState)
 {

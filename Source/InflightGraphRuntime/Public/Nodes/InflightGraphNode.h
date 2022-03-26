@@ -6,6 +6,7 @@
 #include "InflightGraphNode.generated.h"
 
 class UInflightGraph;
+class UInflightGraphBlueprint;
 
 /**
  * Base abstract class for every node of the graph.
@@ -19,7 +20,11 @@ public:
 	UInflightGraphNode();
 
 	virtual void SetGraph(UInflightGraph* InGraph);
+	virtual void SetGraphBlueprint(UInflightGraphBlueprint* InGraph);
+
 	virtual UInflightGraph* GetGraph();
+	virtual UInflightGraphBlueprint* GetGraphBlueprint();
+
 	virtual bool HasParentNodes();
 	virtual void LinkArgumentNodeAsChild(UInflightGraphNode* Child);
 	virtual void ClearLinks();
@@ -46,6 +51,9 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UInflightGraph> Graph = nullptr;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UInflightGraphBlueprint> GraphBlueprint = nullptr;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UInflightGraphNode>> ParentNodes;

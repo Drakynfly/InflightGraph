@@ -14,6 +14,7 @@ class UInflightEditorGraphSchema : public UEdGraphSchema
 	GENERATED_BODY()
 
 public:
+
 	UInflightEditorGraphSchema(const FObjectInitializer& ObjectInitializer)
 	  : Super(ObjectInitializer) {}
 

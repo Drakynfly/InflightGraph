@@ -26,13 +26,15 @@ void FInflightEditorModule::ShutdownModule()
 	NodeHelper.Reset();
 }
 
-void FInflightEditorModule::StartNodeHelper()
+TSharedPtr<FInflightGraphEditor_ClassHelper> FInflightEditorModule::GetHelper()
 {
 	if (!NodeHelper.IsValid())
 	{
 		NodeHelper = MakeShareable(new FInflightGraphEditor_ClassHelper(UInflightGraphNode::StaticClass()));
 		FInflightGraphEditor_ClassHelper::AddObservedBlueprintClasses(UInflightGraphNode::StaticClass());
 	}
+
+	return NodeHelper;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -6,7 +6,7 @@
 #include "EdGraph/EdGraph.h"
 #include "InflightGraphEditor.generated.h"
 
-class UInflightGraph;
+class UInflightGraphBlueprint;
 
 /**
  *
@@ -21,5 +21,5 @@ public:
 	virtual void ClearOldLinks();
 	virtual void LinkAssetNodes();
 	virtual void RefreshNodes();
-	virtual UInflightGraph* GetGraphAsset();
+	virtual UInflightGraphBlueprint* GetGraphBlueprint();
 };

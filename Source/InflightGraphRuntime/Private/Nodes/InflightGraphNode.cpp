@@ -20,9 +20,19 @@ void UInflightGraphNode::SetGraph(UInflightGraph* InGraph)
 	Graph = InGraph;
 }
 
+void UInflightGraphNode::SetGraphBlueprint(UInflightGraphBlueprint* InGraph)
+{
+	GraphBlueprint = InGraph;
+}
+
 UInflightGraph* UInflightGraphNode::GetGraph()
 {
 	return Graph;
+}
+
+UInflightGraphBlueprint* UInflightGraphNode::GetGraphBlueprint()
+{
+	return GraphBlueprint;
 }
 
 FText UInflightGraphNode::GetNodeTitle_Implementation()

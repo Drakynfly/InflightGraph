@@ -104,7 +104,7 @@ void UInflightEditorGraphNode::DestroyNode()
 {
 	if (AssetNode)
 	{
-		AssetNode->GetGraph()->RemoveNode(AssetNode);
+		AssetNode->GetGraphBlueprint()->RemoveNode(AssetNode);
 		AssetNode->ConditionalBeginDestroy();
 		AssetNode = nullptr;
 	}
