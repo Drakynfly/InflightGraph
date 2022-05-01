@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class InflightGraph : ModuleRules
+public class InflightGraphExample : ModuleRules
 {
-	public InflightGraph(ReadOnlyTargetRules Target) : base(Target)
+	public InflightGraphExample (ReadOnlyTargetRules Target) : base(Target)
     {
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		bUseUnity = false;
@@ -15,6 +15,8 @@ public class InflightGraph : ModuleRules
 				"Core",
 				"CoreUObject",
                 "Engine",
+                "InflightGraph",
+                "InputCore",
                 "EnhancedInput"
 			});
 

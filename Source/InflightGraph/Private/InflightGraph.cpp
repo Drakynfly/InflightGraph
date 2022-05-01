@@ -2,72 +2,162 @@
 
 #include "InflightGraph.h"
 
+#include "EnhancedInputComponent.h"
+#include "InflightGraphModule.h"
+#include "InflightGraphState.h"
+#include "UObject/ObjectSaveContext.h"
+
 #define LOCTEXT_NAMESPACE "InflightGraph"
 
 UInflightGraph::UInflightGraph()
 {
 }
 
-int32 UInflightGraph::GetLevelNum() const
+#if WITH_EDITOR
+void UInflightGraph::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	int32 Level = 0;
-	TArray<UInflightGraphNode*> CurrLevelNodes = RootNodes;
-	TArray<UInflightGraphNode*> NextLevelNodes;
+	UObject::PostEditChangeProperty(PropertyChangedEvent);
 
-	while (CurrLevelNodes.Num() != 0)
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UInflightGraph, StartingState))
 	{
-		for (int32 i = 0; i < CurrLevelNodes.Num(); ++i)
-		{
-			UInflightGraphNode* Node = CurrLevelNodes[i];
-			check(Node != nullptr);
-
-			for (int32 j = 0; j < Node->GetChildrenNodes().Num(); ++j)
-			{
-				NextLevelNodes.Add(Node->GetChildrenNodes()[j]);
-			}
-		}
-
-		CurrLevelNodes = NextLevelNodes;
-		NextLevelNodes.Reset();
-		++Level;
+		ExecRebuildGraph();
 	}
-
-	return Level;
 }
 
-void UInflightGraph::GetNodesByLevel(int32 Level, TArray<UInflightGraphNode*>& Nodes)
+void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
 {
-	int32 CurrLevel = 0;
-	TArray<UInflightGraphNode*> NextLevelNodes;
+	ExecRebuildGraph();
+	UObject::PreSave(SaveContext);
+}
 
-	Nodes = RootNodes;
+void UInflightGraph::ExecRebuildGraph()
+{
+	// Cache Rebuild Data
+	RegisteredInputNames_REBUILDDATA = RegisteredInputNames;
 
-	while (Nodes.Num() != 0)
+	// Empty all permanent caches.
+	ClearGraph();
+
+	// Allow BP to run RebuildGraph
+	FEditorScriptExecutionGuard();
+	RebuildGraph();
+
+	// Select the root node from asset config
+	RootNode = Cast<UInflightGraphState>(FindNodeByName(StartingState));
+
+	// Auto-fill cached values for rebuilt keys.
+	for (auto PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
 	{
-		if (CurrLevel == Level)
-			break;
-
-		for (int32 i = 0; i < Nodes.Num(); ++i)
+		if (RegisteredInputNames.Contains(PreviouslyRegisteredInput.Key))
 		{
-			UInflightGraphNode* Node = Nodes[i];
-			check(Node != nullptr);
-
-			for (int32 j = 0; j < Node->GetChildrenNodes().Num(); ++j)
-			{
-				NextLevelNodes.Add(Node->GetChildrenNodes()[j]);
-			}
+			RegisteredInputNames.Add(PreviouslyRegisteredInput);
 		}
-
-		Nodes = NextLevelNodes;
-		NextLevelNodes.Reset();
-		++CurrLevel;
 	}
+
+	RegisteredInputNames_REBUILDDATA.Empty();
 }
 
 void UInflightGraph::ClearGraph()
 {
-	RootNodes.Empty();
 	AllNodes.Empty();
+	RootNode = nullptr;
+	RegisteredInputNames.Empty();
 }
+
+UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
+{
+	UInflightGraphNodeBase* NewNode = NewObject<UInflightGraphNodeBase>(this, NodeClass);
+
+	NewNode->Setup(this, Name);
+
+	AllNodes.Add(NewNode);
+
+	return NewNode;
+}
+
+void UInflightGraph::RegisterInputBinding(const FName Trigger)
+{
+	RegisteredInputNames.Add(Trigger);
+}
+#endif
+
+void UInflightGraph::RebuildGraph_Implementation()
+{
+}
+
+UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
+{
+#if WITH_EDITOR
+	return AddNode(NodeClass, Name);
+#endif
+}
+
+void UInflightGraph::OnActivated()
+{
+	RootNode->Activate();
+
+	K2_OnActivated();
+}
+
+bool UInflightGraph::TryActivate(UEnhancedInputComponent* InInputComponent)
+{
+	if (!IsAsset() && !ActiveGraph && IsValid(RootNode) && IsValid(InInputComponent))
+	{
+		ActiveGraph = true;
+		InputComponent = InInputComponent;
+
+		// Switch on contained nodes from the Prototype object to this instance.
+		for (const auto Node : AllNodes)
+		{
+			Node->SetupLive(this);
+		}
+
+		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
+
+		OnActivated();
+	}
+
+	return ActiveGraph;
+}
+
+UInputAction* UInflightGraph::GetRegisteredAction(const FName BindingName) const
+{
+	return RegisteredInputNames.Find(BindingName)->Get();
+}
+
+UInflightGraphNodeBase* UInflightGraph::FindNodeByName(const FString& Name)
+{
+	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
+	{
+		if (Node->GetNodeName() == Name)
+		{
+			return Node;
+		}
+	}
+
+	return nullptr;
+}
+
+#if WITH_EDITOR
+TArray<FString> UInflightGraph::GetStatesList()
+{
+	TArray<FString> States;
+
+	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
+	{
+		if (Node->IsA<UInflightGraphState>())
+		{
+			States.Add(Node->GetNodeName());
+		}
+	}
+
+	if (States.IsEmpty())
+	{
+		return {FString("No States to select")};
+	}
+
+	return States;
+}
+#endif
 
 #undef LOCTEXT_NAMESPACE

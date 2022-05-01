@@ -84,7 +84,7 @@ bool UInflightGraphFactory::ConfigureProperties()
 	Filter->DisallowedClassFlags = CLASS_Abstract | CLASS_Deprecated | CLASS_NewerVersionExists | CLASS_HideDropDown;
 	Filter->AllowedChildrenOfClasses.Add(UInflightGraph::StaticClass());
 
-	const FText TitleText = LOCTEXT("CreateInflightGraphAssetOptions", "Pick Generic Graph Class");
+	const FText TitleText = LOCTEXT("CreateInflightGraphAssetOptions", "Pick Inflight Graph Class");
 	UClass* ChosenClass = nullptr;
 	const bool bPressedOk = SClassPickerDialog::PickClass(TitleText, Options, ChosenClass, UInflightGraph::StaticClass());
 
