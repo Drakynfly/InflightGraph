@@ -1,15 +1,14 @@
 // Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "InflightBlueprintFunctionLibrary.h"
+#include "GameFramework/Character.h"
 
-#include "EnhancedInputSubsystems.h"
-
-UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(UObject* Owner, UInflightGraph* InflightAsset, UEnhancedInputComponent* InputComponent)
+UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter* Owner, UInflightGraph* InflightAsset, UEnhancedInputComponent* InputComponent)
 {
-	if (IsValid(InflightAsset))
+	if (IsValid(Owner) && IsValid(InflightAsset))
 	{
-		// Copy the asset into a new object.
-		UInflightGraph* LiveGraph = NewObject<UInflightGraph>(Owner, InflightAsset->GetClass(), NAME_None, RF_NoFlags, InflightAsset);
+		// Copy the date asset object into a new instance that can be modified at runtime.
+		UInflightGraph* LiveGraph = DuplicateObject(InflightAsset, Owner);
 
 		if (IsValid(LiveGraph))
 		{

@@ -5,7 +5,7 @@
 #include "InflightGraphNodeBase.generated.h"
 
 class UInflightGraph;
-class UInflightGraphLink;
+class UInflightLinkBase;
 
 /**
  * Base class for logic nodes inside an inflight graph.
@@ -15,17 +15,23 @@ class INFLIGHTGRAPH_API UInflightGraphNodeBase : public UObject
 {
 	GENERATED_BODY()
 
+	friend UInflightGraph;
+
 public:
 	FString GetNodeName() { return Name; }
 
 	UInflightGraph* GetGraph() const { return Graph; }
+
+	void AddParentLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link);
+
+	void AddChildLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link);
 
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
 	TArray<UInflightGraphNodeBase*> GetChildrenNodes() const { return ChildrenNodes; }
 
 	// Find the Link Object for a child.
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
-	UInflightGraphLink* GetLink(UInflightGraphNodeBase* ChildNode);
+	UInflightLinkBase* GetChildLink(UInflightGraphNodeBase* ChildNode) const;
 
 	// Does this node have no parents
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
@@ -36,8 +42,10 @@ public:
 	bool IsLeafNode() const;
 
 	void Setup(UInflightGraph* InGraph, const FString& InName);
-	void SetupLive(UInflightGraph* LiveGraph);
 
+	void Trigger();
+
+private:
 	void Activate();
 
 	void Deactivate();
@@ -45,6 +53,9 @@ public:
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Inflight Graph Node")
 	void OnSetup();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Inflight Graph Node")
+	void OnTriggered();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Inflight Graph Node")
 	void OnActivated();
@@ -66,6 +77,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph Node")
 	TArray<TObjectPtr<UInflightGraphNodeBase>> ChildrenNodes;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph Node")
-	TMap<TObjectPtr<UInflightGraphNodeBase>, TObjectPtr<UInflightGraphLink>> Links;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inflight Graph Node")
+	TMap<TObjectPtr<UInflightLinkBase>, TObjectPtr<UInflightGraphNodeBase>> Links;
 };

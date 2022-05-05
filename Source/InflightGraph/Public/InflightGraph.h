@@ -7,7 +7,7 @@
 #include "InputAction.h"
 #include "InflightGraph.generated.h"
 
-class UInflightGraphState;
+class UInflightState;
 
 /**
  * Inflight graph is a state machine for locomotion.
@@ -33,12 +33,32 @@ public:
 
 	void ClearGraph();
 
-	UInflightGraphNodeBase* AddNode(TSubclassOf<UInflightGraphNodeBase>, FString Name);
+	UInflightGraphNodeBase* AddNode(TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString& Name);
 
-	template <typename TInflightGraphNode>
-	TInflightGraphNode* AddNode(FString Name)
+	template <typename TInflightGraphNodeClass>
+	TInflightGraphNodeClass* AddNode(const FString& Name)
 	{
-		return Cast<TInflightGraphNode>(AddNode(TInflightGraphNode::StaticClass(), Name));
+		return Cast<TInflightGraphNodeClass>(AddNode(TInflightGraphNodeClass::StaticClass(), Name));
+	}
+
+	UInflightLinkBase* CreateLink(TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name);
+
+	template <typename TInflightLinkNodeClass>
+	TInflightLinkNodeClass* CreateLink(const FString& Name)
+	{
+		return Cast<TInflightLinkNodeClass>(CreateLink(TInflightLinkNodeClass::StaticClass(), Name));
+	}
+
+	/** Link two nodes with a new link instance of the specified class */
+	UInflightLinkBase* LinkNodes(TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name, UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB);
+
+	/** Link two nodes with the provided link instance */
+	void LinkNodes(UInflightLinkBase* LinkObject, UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB);
+
+	template <typename TInflightLinkNodeClass>
+	TInflightLinkNodeClass* LinkNodes(UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB)
+	{
+		return Cast<TInflightLinkNodeClass>(LinkNodes(TInflightLinkNodeClass::StaticClass(), NodeA, NodeB));
 	}
 
 
@@ -55,6 +75,9 @@ public:
 
 	// Try to mark this object instance as a ActiveGraph.
 	bool TryActivate(UEnhancedInputComponent* InInputComponent);
+
+	// Switch the active state.
+	bool SetActiveState(UInflightState* NewActiveState);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Inflight Graph", meta = (DisplayName = "OnActivated"))
 	void K2_OnActivated();
@@ -73,9 +96,9 @@ private:
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
-	TObjectPtr<UInflightGraphState> RootNode;
+	TObjectPtr<UInflightState> RootNode;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inflight Graph")
 	TArray<TObjectPtr<UInflightGraphNodeBase>> AllNodes;
 
 #if WITH_EDITORONLY_DATA
@@ -107,6 +130,9 @@ protected:
 	// Tracks if this object is a live graph, and contains a locomotion state, or is just a prototype instance.
 	UPROPERTY(BlueprintReadOnly)
 	bool ActiveGraph = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UInflightState> ActiveState;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UEnhancedInputComponent> InputComponent = nullptr;

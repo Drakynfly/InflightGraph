@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "InflightGraphNodeBase.h"
-#include "InflightGraphAction.generated.h"
+#include "InflightState.generated.h"
 
 /**
- * Actions are triggerable events that fire one-off abilities.
+ *
  */
-UCLASS(Abstract, Blueprintable)
-class INFLIGHTGRAPH_API UInflightGraphAction : public UInflightGraphNodeBase
+UCLASS(Blueprintable)
+class INFLIGHTGRAPH_API UInflightState : public UInflightGraphNodeBase
 {
 	GENERATED_BODY()
 
-public:
 	virtual void OnSetup_Implementation() override;
+	virtual void OnTriggered_Implementation() override;
 	virtual void OnActivated_Implementation() override;
 	virtual void OnDeactivated_Implementation() override;
 };

@@ -3,8 +3,9 @@
 #include "InflightGraph.h"
 
 #include "EnhancedInputComponent.h"
+#include "InflightLinkBase.h"
 #include "InflightGraphModule.h"
-#include "InflightGraphState.h"
+#include "InflightState.h"
 #include "UObject/ObjectSaveContext.h"
 
 #define LOCTEXT_NAMESPACE "InflightGraph"
@@ -43,7 +44,7 @@ void UInflightGraph::ExecRebuildGraph()
 	RebuildGraph();
 
 	// Select the root node from asset config
-	RootNode = Cast<UInflightGraphState>(FindNodeByName(StartingState));
+	RootNode = Cast<UInflightState>(FindNodeByName(StartingState));
 
 	// Auto-fill cached values for rebuilt keys.
 	for (auto PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
@@ -64,7 +65,7 @@ void UInflightGraph::ClearGraph()
 	RegisteredInputNames.Empty();
 }
 
-UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
+UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString& Name)
 {
 	UInflightGraphNodeBase* NewNode = NewObject<UInflightGraphNodeBase>(this, NodeClass);
 
@@ -73,6 +74,30 @@ UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraph
 	AllNodes.Add(NewNode);
 
 	return NewNode;
+}
+
+UInflightLinkBase* UInflightGraph::CreateLink(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name)
+{
+	UInflightLinkBase* NewLink = NewObject<UInflightLinkBase>(this, LinkClass);
+
+	NewLink->SetName(Name);
+
+	return NewLink;
+}
+
+UInflightLinkBase* UInflightGraph::LinkNodes(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name, UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB)
+{
+	UInflightLinkBase* NewLink = CreateLink(LinkClass, Name);
+	LinkNodes(NewLink, NodeA, NodeB);
+	return NewLink;
+}
+
+void UInflightGraph::LinkNodes(UInflightLinkBase* LinkObject, UInflightGraphNodeBase* NodeA,
+	UInflightGraphNodeBase* NodeB)
+{
+	LinkObject->Setup(this, NodeA, NodeB);
+	NodeA->AddChildLink(NodeB, LinkObject);
+	NodeB->AddParentLink(NodeA, LinkObject);
 }
 
 void UInflightGraph::RegisterInputBinding(const FName Trigger)
@@ -94,7 +119,7 @@ UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGr
 
 void UInflightGraph::OnActivated()
 {
-	RootNode->Activate();
+	SetActiveState(RootNode);
 
 	K2_OnActivated();
 }
@@ -106,18 +131,37 @@ bool UInflightGraph::TryActivate(UEnhancedInputComponent* InInputComponent)
 		ActiveGraph = true;
 		InputComponent = InInputComponent;
 
-		// Switch on contained nodes from the Prototype object to this instance.
-		for (const auto Node : AllNodes)
-		{
-			Node->SetupLive(this);
-		}
-
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
 
 		OnActivated();
 	}
 
 	return ActiveGraph;
+}
+
+bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
+{
+	if (ActiveState == NewActiveState)
+	{
+		// Early-out nonsense call.
+		return false;
+	}
+
+	if (IsValid(ActiveState))
+	{
+		ActiveState->Deactivate();
+		ActiveState = nullptr;
+	}
+
+	// Ensure the state is a valid state that we own.
+	if (IsValid(NewActiveState) && NewActiveState->GetOuter() == this)
+	{
+		ActiveState = NewActiveState;
+		NewActiveState->Activate();
+		return true;
+	}
+
+	return false;
 }
 
 UInputAction* UInflightGraph::GetRegisteredAction(const FName BindingName) const
@@ -145,7 +189,7 @@ TArray<FString> UInflightGraph::GetStatesList()
 
 	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
 	{
-		if (Node->IsA<UInflightGraphState>())
+		if (Node->IsA<UInflightState>())
 		{
 			States.Add(Node->GetNodeName());
 		}

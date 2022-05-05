@@ -3,12 +3,51 @@
 #include "InflightGraphNodeBase.h"
 #include "InflightGraph.h"
 #include "InflightGraphModule.h"
+#include "InflightLinkBase.h"
 
 #define LOCTEXT_NAMESPACE "InflightGraphNode"
 
-UInflightGraphLink* UInflightGraphNodeBase::GetLink(UInflightGraphNodeBase* ChildNode)
+void UInflightGraphNodeBase::AddParentLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link)
 {
-	return Links.Contains(ChildNode) ? Links.FindChecked(ChildNode) : nullptr;
+	if (IsValid(Node) && IsValid(Link))
+	{
+		ParentNodes.Add(Node);
+		Links.Add(Link, Node);
+	}
+}
+
+void UInflightGraphNodeBase::AddChildLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link)
+{
+	if (IsValid(Node) && IsValid(Link))
+	{
+		ChildrenNodes.Add(Node);
+		Links.Add(Link, Node);
+	}
+}
+
+UInflightLinkBase* UInflightGraphNodeBase::GetChildLink(UInflightGraphNodeBase* ChildNode) const
+{
+	UE_LOG(LogInflightGraph, Log, TEXT("Looking for link to ChildNode: %s"), *ChildNode->Name);
+
+	UInflightLinkBase* FoundLink = nullptr;
+
+	// Filter links by those that have the ChildNode as an end node. This filters out looping links, where children and
+	// parents both link to each other.
+	TMap<TObjectPtr<UInflightLinkBase>, TObjectPtr<UInflightGraphNodeBase>> Filtered = Links.FilterByPredicate(
+		[ChildNode, &FoundLink]	(const TTuple<TObjectPtr<UInflightLinkBase>, TObjectPtr<UInflightGraphNodeBase>>& Pair)
+		{
+			if (IsValid(Pair.Key))
+			{
+				if (Pair.Key->GetEndNode() == ChildNode)
+				{
+					FoundLink = Pair.Key;
+				}
+			}
+
+			return false;
+		});
+
+	return FoundLink;
 }
 
 bool UInflightGraphNodeBase::IsRootNode() const
@@ -28,9 +67,9 @@ void UInflightGraphNodeBase::Setup(UInflightGraph* InGraph, const FString& InNam
 	OnSetup();
 }
 
-void UInflightGraphNodeBase::SetupLive(UInflightGraph* LiveGraph)
+void UInflightGraphNodeBase::Trigger()
 {
-	Graph = LiveGraph;
+	OnTriggered();
 }
 
 void UInflightGraphNodeBase::Activate()
@@ -53,6 +92,12 @@ void UInflightGraphNodeBase::Deactivate()
 	}
 
 	OnDeactivated();
+}
+
+void UInflightGraphNodeBase::OnTriggered_Implementation()
+{
+	// This should always be overriden by first level children.
+	check(0);
 }
 
 void UInflightGraphNodeBase::OnSetup_Implementation()
