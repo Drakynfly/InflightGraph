@@ -65,28 +65,41 @@ public:
 	void RegisterInputBinding(const FName Trigger);
 #endif
 
-	UFUNCTION(BlueprintNativeEvent)
-	void RebuildGraph();
+	virtual void RebuildGraph() {}
+
+	virtual void OnActivated();
+
+	virtual void OnDeactivated();
 
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Editor", meta = (DeterminesOutputType = "NodeClass"), meta = (DisplayName = "Add Node"))
 	UInflightGraphNodeBase* K2_AddNode(UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UInflightGraphNodeBase> NodeClass, FString Name);
 
-	virtual void OnActivated();
-
 	// Try to mark this object instance as a ActiveGraph.
-	bool TryActivate(UEnhancedInputComponent* InInputComponent);
+	bool TryActivate(ACharacter* Owner, UEnhancedInputComponent* InInputComponent);
 
-	// Switch the active state.
+	void Deactivate();
+
+	// Switch the active state. Will return true if when the NewActiveState has been successfully activated, or false
+	// otherwise.
 	bool SetActiveState(UInflightState* NewActiveState);
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Inflight Graph", meta = (DisplayName = "OnActivated"))
-	void K2_OnActivated();
 
 	UEnhancedInputComponent* GetInputComponent() const { return InputComponent; }
 
 	UInputAction* GetRegisteredAction(FName BindingName) const;
 
-	UInflightGraphNodeBase* FindNodeByName(const FString& Name);
+private:
+	UInflightGraphNodeBase* FindNodeByNameImpl(const FString& Name);
+
+public:
+
+	template <typename TInflightGraphNodeClass = UInflightGraphNodeBase>
+	TInflightGraphNodeClass* FindNodeByName(const FString& Name)
+	{
+		return Cast<TInflightGraphNodeClass>(FindNodeByNameImpl(Name));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Inflight Graph", meta = (DeterminesOutputType = Class))
+	UInflightGraphNodeBase* FindNodeByName(UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UInflightGraphNodeBase> Class, const FString& Name);
 
 private:
 #if WITH_EDITOR
@@ -98,7 +111,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
 	TObjectPtr<UInflightState> RootNode;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inflight Graph")
+	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
 	TArray<TObjectPtr<UInflightGraphNodeBase>> AllNodes;
 
 #if WITH_EDITORONLY_DATA
@@ -128,12 +141,15 @@ private:
 
 protected:
 	// Tracks if this object is a live graph, and contains a locomotion state, or is just a prototype instance.
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
 	bool ActiveGraph = false;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
+	ACharacter* ActiveCharacter = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
 	TObjectPtr<UInflightState> ActiveState;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
 	TObjectPtr<UEnhancedInputComponent> InputComponent = nullptr;
 };

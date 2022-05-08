@@ -21,13 +21,20 @@ void UInflightGraph::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UInflightGraph, StartingState))
 	{
-		ExecRebuildGraph();
+		if (IsAsset())
+		{
+			ExecRebuildGraph();
+		}
 	}
 }
 
 void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
 {
-	ExecRebuildGraph();
+	if (IsAsset())
+	{
+		ExecRebuildGraph();
+	}
+
 	UObject::PreSave(SaveContext);
 }
 
@@ -39,12 +46,11 @@ void UInflightGraph::ExecRebuildGraph()
 	// Empty all permanent caches.
 	ClearGraph();
 
-	// Allow BP to run RebuildGraph
-	FEditorScriptExecutionGuard();
+	// Hook for child class to construct all nodes and links.
 	RebuildGraph();
 
 	// Select the root node from asset config
-	RootNode = Cast<UInflightState>(FindNodeByName(StartingState));
+	RootNode = FindNodeByName<UInflightState>(StartingState);
 
 	// Auto-fill cached values for rebuilt keys.
 	for (auto PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
@@ -106,8 +112,14 @@ void UInflightGraph::RegisterInputBinding(const FName Trigger)
 }
 #endif
 
-void UInflightGraph::RebuildGraph_Implementation()
+void UInflightGraph::OnActivated()
 {
+	SetActiveState(RootNode);
+}
+
+void UInflightGraph::OnDeactivated()
+{
+	SetActiveState(nullptr);
 }
 
 UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
@@ -117,18 +129,12 @@ UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGr
 #endif
 }
 
-void UInflightGraph::OnActivated()
-{
-	SetActiveState(RootNode);
-
-	K2_OnActivated();
-}
-
-bool UInflightGraph::TryActivate(UEnhancedInputComponent* InInputComponent)
+bool UInflightGraph::TryActivate(ACharacter* Owner, UEnhancedInputComponent* InInputComponent)
 {
 	if (!IsAsset() && !ActiveGraph && IsValid(RootNode) && IsValid(InInputComponent))
 	{
 		ActiveGraph = true;
+		ActiveCharacter = Owner;
 		InputComponent = InInputComponent;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
@@ -137,6 +143,20 @@ bool UInflightGraph::TryActivate(UEnhancedInputComponent* InInputComponent)
 	}
 
 	return ActiveGraph;
+}
+
+void UInflightGraph::Deactivate()
+{
+	if (!IsAsset() && ActiveGraph)
+	{
+		ActiveGraph = false;
+		ActiveCharacter = nullptr;
+		InputComponent = nullptr;
+
+		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s deactivated!"), *GetName())
+
+		OnDeactivated();
+	}
 }
 
 bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
@@ -169,17 +189,22 @@ UInputAction* UInflightGraph::GetRegisteredAction(const FName BindingName) const
 	return RegisteredInputNames.Find(BindingName)->Get();
 }
 
-UInflightGraphNodeBase* UInflightGraph::FindNodeByName(const FString& Name)
+UInflightGraphNodeBase* UInflightGraph::FindNodeByNameImpl(const FString& Name)
 {
 	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
 	{
-		if (Node->GetNodeName() == Name)
+		if (Node && Node->GetNodeName() == Name)
 		{
 			return Node;
 		}
 	}
 
 	return nullptr;
+}
+
+UInflightGraphNodeBase* UInflightGraph::FindNodeByName(TSubclassOf<UInflightGraphNodeBase> Class, const FString& Name)
+{
+	return FindNodeByNameImpl(Name);
 }
 
 #if WITH_EDITOR
@@ -189,7 +214,7 @@ TArray<FString> UInflightGraph::GetStatesList()
 
 	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
 	{
-		if (Node->IsA<UInflightState>())
+		if (Node && Node->IsA<UInflightState>())
 		{
 			States.Add(Node->GetNodeName());
 		}

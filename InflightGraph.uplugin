@@ -25,11 +25,6 @@
 			"Name" : "InflightGraphEditor",
 			"Type" : "Editor",
 			"LoadingPhase" : "Default"
-		},
-		{
-			"Name" : "InflightGraphExample",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [

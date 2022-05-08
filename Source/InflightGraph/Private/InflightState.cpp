@@ -16,6 +16,8 @@ void UInflightState::OnTriggered_Implementation()
 	{
 		UE_LOG(LogInflightGraph, Warning, TEXT("State \"%s\" failed to set as active"), *Name)
 	}
+
+	EventOnTriggered.Broadcast();
 }
 
 void UInflightState::OnActivated_Implementation()
@@ -44,6 +46,8 @@ void UInflightState::OnActivated_Implementation()
 			UE_LOG(LogInflightGraph, Error, TEXT("     ChildNode in Children Nodes is invalid!"));
 		}
 	}
+
+	EventOnActivated.Broadcast();
 }
 
 void UInflightState::OnDeactivated_Implementation()
@@ -57,4 +61,6 @@ void UInflightState::OnDeactivated_Implementation()
 			LinkToChild->Deactivate();
 		}
 	}
+
+	EventOnDeactivated.Broadcast();
 }

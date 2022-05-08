@@ -14,7 +14,7 @@ UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter
 		{
 			if (IsValid(InputComponent))
 			{
-				LiveGraph->TryActivate(InputComponent);
+				LiveGraph->TryActivate(Owner, InputComponent);
 			}
 
 			return LiveGraph;
@@ -22,4 +22,12 @@ UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter
 	}
 
 	return nullptr;
+}
+
+void UInflightBlueprintFunctionLibrary::EndInflightGraph(UInflightGraph* InflightInstance)
+{
+	if (IsValid(InflightInstance))
+	{
+		InflightInstance->Deactivate();
+	}
 }
