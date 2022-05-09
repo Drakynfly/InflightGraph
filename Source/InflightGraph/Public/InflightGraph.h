@@ -101,6 +101,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph", meta = (DeterminesOutputType = Class))
 	UInflightGraphNodeBase* FindNodeByName(UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UInflightGraphNodeBase> Class, const FString& Name);
 
+	// Trigger an action node by name if its active.
+	UFUNCTION(BlueprintCallable, Category = "Inflight Graph")
+	void RemoteTriggerAction(const FString& Name);
+
 private:
 #if WITH_EDITOR
 	UFUNCTION()

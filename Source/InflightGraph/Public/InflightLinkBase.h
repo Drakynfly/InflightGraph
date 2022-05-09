@@ -16,10 +16,10 @@ class INFLIGHTGRAPH_API UInflightLinkBase : public UObject
 	GENERATED_BODY()
 
 public:
-	FString GetNodeName() const { return Name; }
+	FString GetLinkName() const { return Name; }
 	UInflightGraph* GetGraph() const { return Graph; }
-	UInflightGraphNodeBase* GetStartNode() const { return StartNode; }
-	UInflightGraphNodeBase* GetEndNode() const { return EndNode; }
+	TArray<UInflightGraphNodeBase*> GetStartNodes() const { return StartNodes; }
+	TArray<UInflightGraphNodeBase*> GetEndNodes() const { return EndNodes; }
 
 	void SetName(const FString& InName);
 
@@ -51,11 +51,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Link")
 	TObjectPtr<UInflightGraph> Graph;
 
-	// The node that can invoke us.
+	// The nodes that can invoke us.
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Link")
-	TObjectPtr<UInflightGraphNodeBase> StartNode;
+	TArray<TObjectPtr<UInflightGraphNodeBase>> StartNodes;
 
-	// The node that we invoke.
+	// The nodes that we invoke.
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Link")
-	TObjectPtr<UInflightGraphNodeBase> EndNode;
+	TArray<TObjectPtr<UInflightGraphNodeBase>> EndNodes;
 };

@@ -16,6 +16,8 @@ class INFLIGHTGRAPH_API UInflightState : public UInflightGraphNodeBase
 {
 	GENERATED_BODY()
 
+	friend class UInflightLinkBase;
+
 protected:
 	virtual void OnSetup_Implementation() override;
 	virtual void OnTriggered_Implementation() override;

@@ -13,19 +13,35 @@ void UInflightLinkBase::Setup(UInflightGraph* InflightGraph, UInflightGraphNodeB
                               UInflightGraphNodeBase* NodeB)
 {
 	Graph = InflightGraph;
-	StartNode = NodeA;
-	EndNode = NodeB;
+	StartNodes.AddUnique(NodeA);
+	EndNodes.AddUnique(NodeB);
 
 	OnSetup();
 }
 
 void UInflightLinkBase::Activate()
 {
+	for (auto&& EndNode : EndNodes)
+	{
+		if (IsValid(EndNode))
+		{
+			EndNode->AddActivationTrigger(this);
+		}
+	}
+
 	OnActivated();
 }
 
 void UInflightLinkBase::Deactivate()
 {
+	for (auto&& EndNode : EndNodes)
+	{
+		if (IsValid(EndNode))
+		{
+			EndNode->RemoveActivationTrigger(this);
+		}
+	}
+
 	OnDeactivated();
 }
 
@@ -48,4 +64,11 @@ void UInflightLinkBase::OnDeactivated()
 
 void UInflightLinkBase::OnTriggered()
 {
+	for (auto&& EndNode : EndNodes)
+	{
+		if (IsValid(EndNode))
+		{
+			EndNode->Trigger();
+		}
+	}
 }

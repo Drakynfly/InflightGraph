@@ -3,6 +3,7 @@
 #include "InflightGraph.h"
 
 #include "EnhancedInputComponent.h"
+#include "InflightActionBase.h"
 #include "InflightLinkBase.h"
 #include "InflightGraphModule.h"
 #include "InflightState.h"
@@ -126,6 +127,8 @@ UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGr
 {
 #if WITH_EDITOR
 	return AddNode(NodeClass, Name);
+#else
+	return nullptr;
 #endif
 }
 
@@ -169,7 +172,7 @@ bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
 
 	if (IsValid(ActiveState))
 	{
-		ActiveState->Deactivate();
+		ActiveState->RemoveActivationTrigger(this);
 		ActiveState = nullptr;
 	}
 
@@ -177,7 +180,7 @@ bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
 	if (IsValid(NewActiveState) && NewActiveState->GetOuter() == this)
 	{
 		ActiveState = NewActiveState;
-		NewActiveState->Activate();
+		NewActiveState->AddActivationTrigger(this);
 		return true;
 	}
 
@@ -186,7 +189,8 @@ bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
 
 UInputAction* UInflightGraph::GetRegisteredAction(const FName BindingName) const
 {
-	return RegisteredInputNames.Find(BindingName)->Get();
+	if (!RegisteredInputNames.Contains(BindingName)) return nullptr;
+	return RegisteredInputNames.FindChecked(BindingName);
 }
 
 UInflightGraphNodeBase* UInflightGraph::FindNodeByNameImpl(const FString& Name)
@@ -205,6 +209,16 @@ UInflightGraphNodeBase* UInflightGraph::FindNodeByNameImpl(const FString& Name)
 UInflightGraphNodeBase* UInflightGraph::FindNodeByName(TSubclassOf<UInflightGraphNodeBase> Class, const FString& Name)
 {
 	return FindNodeByNameImpl(Name);
+}
+
+void UInflightGraph::RemoteTriggerAction(const FString& Name)
+{
+	const auto NamedNode = FindNodeByName<UInflightActionBase>(Name);
+
+	if (IsValid(NamedNode) && NamedNode->IsActive())
+	{
+		NamedNode->Trigger();
+	}
 }
 
 #if WITH_EDITOR

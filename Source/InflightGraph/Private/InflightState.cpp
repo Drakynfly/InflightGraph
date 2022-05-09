@@ -32,7 +32,7 @@ void UInflightState::OnActivated_Implementation()
 
 			if (IsValid(ChildLink))
 			{
-				UE_LOG(LogInflightGraph, Log, TEXT("     Child of state: %s. Link to state: %s"), *ChildNode->GetNodeName(), *ChildLink->GetNodeName())
+				UE_LOG(LogInflightGraph, Log, TEXT("     Child of state: %s. Link to state: %s"), *ChildNode->GetNodeName(), *ChildLink->GetLinkName())
 
 				ChildLink->Activate();
 			}
@@ -56,9 +56,14 @@ void UInflightState::OnDeactivated_Implementation()
 
 	for (auto ChildNode : ChildrenNodes)
 	{
-		if (UInflightLinkBase* LinkToChild = GetChildLink(ChildNode))
+		if (IsValid(ChildNode))
 		{
-			LinkToChild->Deactivate();
+			UInflightLinkBase* LinkToChild = GetChildLink(ChildNode);
+
+			if (IsValid(LinkToChild))
+			{
+				LinkToChild->Deactivate();
+			}
 		}
 	}
 

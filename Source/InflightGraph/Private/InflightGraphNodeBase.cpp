@@ -38,7 +38,7 @@ UInflightLinkBase* UInflightGraphNodeBase::GetChildLink(UInflightGraphNodeBase* 
 		{
 			if (IsValid(Pair.Key))
 			{
-				if (Pair.Key->GetEndNode() == ChildNode)
+				if (Pair.Key->GetEndNodes().Contains(ChildNode))
 				{
 					FoundLink = Pair.Key;
 				}
@@ -48,6 +48,11 @@ UInflightLinkBase* UInflightGraphNodeBase::GetChildLink(UInflightGraphNodeBase* 
 		});
 
 	return FoundLink;
+}
+
+bool UInflightGraphNodeBase::IsActive() const
+{
+	return Activated;
 }
 
 bool UInflightGraphNodeBase::IsRootNode() const
@@ -69,22 +74,57 @@ void UInflightGraphNodeBase::Setup(UInflightGraph* InGraph, const FString& InNam
 
 void UInflightGraphNodeBase::Trigger()
 {
-	OnTriggered();
+	if (ensure(Activated))
+	{
+		OnTriggered();
+	}
+}
+
+void UInflightGraphNodeBase::AddActivationTrigger(UObject* Trigger)
+{
+	if (IsValid(Trigger))
+	{
+		ActivationTriggers.AddUnique(Trigger);
+
+		if (!Activated)
+		{
+			Activate();
+		}
+	}
+}
+
+void UInflightGraphNodeBase::RemoveActivationTrigger(UObject* Trigger)
+{
+	if (IsValid(Trigger))
+	{
+		ActivationTriggers.Remove(Trigger);
+
+		if (ActivationTriggers.IsEmpty())
+		{
+			Deactivate();
+		}
+	}
 }
 
 void UInflightGraphNodeBase::Activate()
 {
+	ensure(!Activated);
+
 	if (!IsValid(GetGraph()))
 	{
 		UE_LOG(LogInflightGraph, Error, TEXT("<UInflightGraphNodeBase::Activate> Graph pointer is invalid!"))
 		return;
 	}
 
+	Activated = true;
+
 	OnActivated();
 }
 
 void UInflightGraphNodeBase::Deactivate()
 {
+	ensure(Activated);
+
 	if (!IsValid(GetGraph()))
 	{
 		UE_LOG(LogInflightGraph, Error, TEXT("<UInflightGraphNodeBase::Activate> Graph pointer is invalid!"))
@@ -92,30 +132,32 @@ void UInflightGraphNodeBase::Deactivate()
 	}
 
 	OnDeactivated();
+
+	Activated = false;
 }
 
 void UInflightGraphNodeBase::OnTriggered_Implementation()
 {
 	// This should always be overriden by first level children.
-	check(0);
+	checkNoEntry();
 }
 
 void UInflightGraphNodeBase::OnSetup_Implementation()
 {
 	// This should always be overriden by first level children.
-	check(0);
+	checkNoEntry();
 }
 
 void UInflightGraphNodeBase::OnDeactivated_Implementation()
 {
 	// This should always be overriden by first level children.
-	check(0);
+	checkNoEntry();
 }
 
 void UInflightGraphNodeBase::OnActivated_Implementation()
 {
 	// This should always be overriden by first level children.
-	check(0);
+	checkNoEntry();
 }
 
 #undef LOCTEXT_NAMESPACE

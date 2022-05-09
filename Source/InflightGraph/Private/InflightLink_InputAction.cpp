@@ -48,13 +48,9 @@ void UInflightLink_InputAction::OnDeactivated()
 
 void UInflightLink_InputAction::OnTriggered()
 {
-	Super::OnTriggered();
+	UE_LOG(LogInflightGraph, Log, TEXT("Link %s binding triggered!"), *ActionBinding.LinkName.ToString());
 
-	UE_LOG(LogInflightGraph, Log, TEXT("GraphLink %s binding triggered!"), *ActionBinding.LinkName.ToString());
-	if (IsValid(EndNode))
-	{
-		EndNode->Trigger();
-	}
+	Super::OnTriggered();
 }
 
 void UInflightLink_InputAction::ActionTrigger(const FInputActionValue& ActionValue)

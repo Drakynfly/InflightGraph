@@ -33,16 +33,6 @@ void UInflightLink_MovementMode::OnDeactivated()
 	}
 }
 
-void UInflightLink_MovementMode::OnTriggered()
-{
-	Super::OnTriggered();
-
-	if (IsValid(EndNode))
-	{
-		EndNode->Trigger();
-	}
-}
-
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 void UInflightLink_MovementMode::ModeTrigger(ACharacter* Character, EMovementMode PrevMovementMode,
                                              uint8 PreviousCustomMode)

@@ -15,12 +15,10 @@ class INFLIGHTGRAPH_API UInflightGraphNodeBase : public UObject
 {
 	GENERATED_BODY()
 
-	friend UInflightGraph;
-
 public:
 	FString GetNodeName() { return Name; }
 
-	UInflightGraph* GetGraph() const { return Graph; }
+	UInflightGraph* GetGraph() const { return !Graph.IsNullNoResolve() ? Graph : nullptr; }
 
 	void AddParentLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link);
 
@@ -33,6 +31,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
 	UInflightLinkBase* GetChildLink(UInflightGraphNodeBase* ChildNode) const;
 
+	// Is this node listening for Triggers
+	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
+	bool IsActive() const;
+
 	// Does this node have no parents
 	UFUNCTION(BlueprintCallable, Category = "Inflight Graph Node")
 	bool IsRootNode() const;
@@ -44,6 +46,10 @@ public:
 	void Setup(UInflightGraph* InGraph, const FString& InName);
 
 	void Trigger();
+
+	void AddActivationTrigger(UObject* Trigger);
+
+	void RemoveActivationTrigger(UObject* Trigger);
 
 private:
 	void Activate();
@@ -79,4 +85,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inflight Graph Node")
 	TMap<TObjectPtr<UInflightLinkBase>, TObjectPtr<UInflightGraphNodeBase>> Links;
+
+private:
+	UPROPERTY()
+	bool Activated = false;
+
+	// Objects keeping us active
+	UPROPERTY()
+	TArray<TWeakObjectPtr<UObject>> ActivationTriggers;
 };
