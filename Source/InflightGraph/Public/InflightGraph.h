@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "EnhancedInputComponent.h"
 #include "InflightGraphNodeBase.h"
 #include "InputAction.h"
 #include "InflightGraph.generated.h"
@@ -75,7 +74,7 @@ public:
 	UInflightGraphNodeBase* K2_AddNode(UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UInflightGraphNodeBase> NodeClass, FString Name);
 
 	// Try to mark this object instance as a ActiveGraph.
-	bool TryActivate(ACharacter* Owner, UEnhancedInputComponent* InInputComponent);
+	bool TryActivate(APawn* Owner, UInputComponent* InInputComponent);
 
 	void Deactivate();
 
@@ -83,7 +82,8 @@ public:
 	// otherwise.
 	bool SetActiveState(UInflightState* NewActiveState);
 
-	UEnhancedInputComponent* GetInputComponent() const { return InputComponent; }
+	template <typename TInputComponentClass = UInputComponent>
+	TInputComponentClass* GetInputComponent() const { return Cast<TInputComponentClass>(InputComponent); }
 
 	UInputAction* GetRegisteredAction(FName BindingName) const;
 
@@ -149,11 +149,11 @@ protected:
 	bool ActiveGraph = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
-	ACharacter* ActiveCharacter = nullptr;
+	APawn* ActivePawn = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
 	TObjectPtr<UInflightState> ActiveState;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
-	TObjectPtr<UEnhancedInputComponent> InputComponent = nullptr;
+	TObjectPtr<UInputComponent> InputComponent = nullptr;
 };

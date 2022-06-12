@@ -3,7 +3,7 @@
 #include "InflightBlueprintFunctionLibrary.h"
 #include "GameFramework/Character.h"
 
-UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter* Owner, UInflightGraph* InflightAsset, UEnhancedInputComponent* InputComponent)
+UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter* Owner, UInflightGraph* InflightAsset, UInputComponent* InputComponent)
 {
 	if (IsValid(Owner) && IsValid(InflightAsset))
 	{

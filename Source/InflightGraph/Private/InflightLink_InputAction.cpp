@@ -27,7 +27,7 @@ void UInflightLink_InputAction::OnActivated()
 		return;
 	}
 
-	if (UEnhancedInputComponent* InputComp = Graph->GetInputComponent())
+	if (UEnhancedInputComponent* InputComp = Graph->GetInputComponent<UEnhancedInputComponent>())
 	{
 		InputLinkPtr = &InputComp->BindAction(MovementAction, ActionBinding.Trigger, this, &ThisClass::ActionTrigger);
 	}
@@ -39,7 +39,7 @@ void UInflightLink_InputAction::OnDeactivated()
 
 	if (InputLinkPtr != nullptr)
 	{
-		if (UEnhancedInputComponent* InputComp = Graph->GetInputComponent())
+		if (UEnhancedInputComponent* InputComp = Graph->GetInputComponent<UEnhancedInputComponent>())
 		{
 			InputComp->RemoveBinding(*InputLinkPtr);
 		}

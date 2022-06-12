@@ -132,12 +132,12 @@ UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGr
 #endif
 }
 
-bool UInflightGraph::TryActivate(ACharacter* Owner, UEnhancedInputComponent* InInputComponent)
+bool UInflightGraph::TryActivate(APawn* Owner, UInputComponent* InInputComponent)
 {
 	if (!IsAsset() && !ActiveGraph && IsValid(RootNode) && IsValid(InInputComponent))
 	{
 		ActiveGraph = true;
-		ActiveCharacter = Owner;
+		ActivePawn = Owner;
 		InputComponent = InInputComponent;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
@@ -153,7 +153,7 @@ void UInflightGraph::Deactivate()
 	if (!IsAsset() && ActiveGraph)
 	{
 		ActiveGraph = false;
-		ActiveCharacter = nullptr;
+		ActivePawn = nullptr;
 		InputComponent = nullptr;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s deactivated!"), *GetName())
