@@ -1,30 +1,29 @@
 {
-	"FileVersion" : 3,
-	"Version" : 1,
-	"VersionName" : "1.0",
-	"FriendlyName" : "Inflight Graph",
-	"Description" : "",
-	"Category" : "Locomotion",
-	"CreatedBy" : "Guy (Drakynfly) Lundvall",
-	"CreatedByURL" : "",
-	"DocsURL" : "",
-	"MarketplaceURL" : "",
-	"SupportURL" : "",
-	"EnabledByDefault" : true,
-	"CanContainContent" : true,
-	"IsBetaVersion" : false,
-	"Installed" : false,
-	"Modules" :
-	[
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Inflight Graph",
+	"Description": "",
+	"Category": "Domain: Animation",
+	"CreatedBy": "Guy (Drakynfly) Lundvall",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
 		{
-			"Name" : "InflightGraph",
-			"Type" : "Runtime",
-			"LoadingPhase" : "PreDefault"
+			"Name": "InflightGraph",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault"
 		},
 		{
-			"Name" : "InflightGraphEditor",
-			"Type" : "Editor",
-			"LoadingPhase" : "Default"
+			"Name": "InflightGraphEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -32,5 +31,6 @@
 			"Name": "EnhancedInput",
 			"Enabled": true
 		}
-	]
+	],
+	"IsExperimentalVersion": false
 }
