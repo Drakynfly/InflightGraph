@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Inflight Graph",
-	"Description": "",
+	"Description": "A simple object-based state machine to keep track of locomotion states",
 	"Category": "Domain: Animation",
 	"CreatedBy": "Guy (Drakynfly) Lundvall",
 	"CreatedByURL": "",
