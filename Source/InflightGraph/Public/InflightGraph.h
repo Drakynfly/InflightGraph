@@ -60,6 +60,7 @@ public:
 		return Cast<TInflightLinkNodeClass>(LinkNodes(TInflightLinkNodeClass::StaticClass(), NodeA, NodeB));
 	}
 
+	void SetRootNode(UInflightState* Node);
 
 	void RegisterInputBinding(const FName Trigger);
 #endif
@@ -118,16 +119,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
 	TArray<TObjectPtr<UInflightGraphNodeBase>> AllNodes;
 
-#if WITH_EDITORONLY_DATA
+
 	///////////////////////////////////////////////////////////////
 	///					BLUEPRINT CONFIG						///
 	///		These members are edited by BP children assets		///
 	///////////////////////////////////////////////////////////////
-
-	/** The state that newly created Inflight Machines initialize to. */
-	UPROPERTY(EditAnywhere, Category = "Inflight Graph Config", meta = (GetOptions = "GetStatesList"))
-	FString StartingState;
-#endif
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inflight Graph Config")
 	TMap<FName, TObjectPtr<UInputAction>> RegisteredInputNames;

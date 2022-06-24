@@ -20,13 +20,7 @@ void UInflightGraph::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UInflightGraph, StartingState))
-	{
-		if (IsAsset())
-		{
-			ExecRebuildGraph();
-		}
-	}
+
 }
 
 void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
@@ -49,9 +43,6 @@ void UInflightGraph::ExecRebuildGraph()
 
 	// Hook for child class to construct all nodes and links.
 	RebuildGraph();
-
-	// Select the root node from asset config
-	RootNode = FindNodeByName<UInflightState>(StartingState);
 
 	// Auto-fill cached values for rebuilt keys.
 	for (auto PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
@@ -105,6 +96,11 @@ void UInflightGraph::LinkNodes(UInflightLinkBase* LinkObject, UInflightGraphNode
 	LinkObject->Setup(this, NodeA, NodeB);
 	NodeA->AddChildLink(NodeB, LinkObject);
 	NodeB->AddParentLink(NodeA, LinkObject);
+}
+
+void UInflightGraph::SetRootNode(UInflightState* Node)
+{
+	RootNode = Node;
 }
 
 void UInflightGraph::RegisterInputBinding(const FName Trigger)
