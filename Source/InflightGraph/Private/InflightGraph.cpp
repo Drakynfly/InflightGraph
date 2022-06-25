@@ -103,20 +103,51 @@ void UInflightGraph::SetRootNode(UInflightState* Node)
 	RootNode = Node;
 }
 
-void UInflightGraph::RegisterInputBinding(const FName Trigger)
+void UInflightGraph::RegisterInputBinding(const FName BindingName)
 {
-	RegisteredInputNames.Add(Trigger);
+	RegisteredInputNames.Add(BindingName);
+}
+
+void UInflightGraph::RegisterInputBinding(const ETriggerEvent Trigger, const FName Function)
+{
+	RegisteredInputNames.Add(Function);
+	AutomaticInputBindings.Add({Trigger, Function});
 }
 #endif
 
 void UInflightGraph::OnActivated()
 {
-	SetActiveState(RootNode);
+	if (IsValid(InputComponent))
+	{
+		if (UEnhancedInputComponent* const EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+		{
+			for (const FInflightInputBinding& InputBinding : AutomaticInputBindings)
+			{
+				// For some reason if we try to pass "this" directly into the BindAction call it tries to compile the
+				// templated version that expects a function pointer instead of a FName, so we need to do this . . .
+				UObject* Target = this;
+
+				if (const UInputAction* Action = GetRegisteredAction(InputBinding.FunctionName))
+				{
+					uint32 NewBinding = EnhancedInput->BindAction(Action,
+								InputBinding.Trigger, Target, InputBinding.FunctionName).GetHandle();
+
+					BindingHandles.Add(NewBinding);
+				}
+			}
+		}
+	}
 }
 
 void UInflightGraph::OnDeactivated()
 {
-	SetActiveState(nullptr);
+	if (UEnhancedInputComponent* const EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		for (const uint32 Handle : BindingHandles)
+		{
+			EnhancedInput->RemoveBindingByHandle(Handle);
+		}
+	}
 }
 
 UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
@@ -128,17 +159,20 @@ UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGr
 #endif
 }
 
-bool UInflightGraph::TryActivate(APawn* Owner, UInputComponent* InInputComponent)
+bool UInflightGraph::TryActivate(APawn* Owner, UEnhancedInputComponent* InInputComponent)
 {
+	//InflightState* StartingNode = DetermineStartingNode();
+
 	if (!IsAsset() && !ActiveGraph && IsValid(RootNode) && IsValid(InInputComponent))
 	{
 		ActiveGraph = true;
 		ActivePawn = Owner;
 		InputComponent = InInputComponent;
+		//SetActiveState(StartingNode);
+		SetActiveState(RootNode);
+		OnActivated();
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
-
-		OnActivated();
 	}
 
 	return ActiveGraph;
@@ -148,13 +182,15 @@ void UInflightGraph::Deactivate()
 {
 	if (!IsAsset() && ActiveGraph)
 	{
+		SetActiveState(nullptr);
+		OnDeactivated();
+
 		ActiveGraph = false;
 		ActivePawn = nullptr;
 		InputComponent = nullptr;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s deactivated!"), *GetName())
 
-		OnDeactivated();
 	}
 }
 

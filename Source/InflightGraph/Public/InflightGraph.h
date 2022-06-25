@@ -6,7 +6,21 @@
 #include "InputAction.h"
 #include "InflightGraph.generated.h"
 
+class UEnhancedInputComponent;
 class UInflightState;
+
+
+USTRUCT()
+struct FInflightInputBinding
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	ETriggerEvent Trigger;
+
+	UPROPERTY()
+	FName FunctionName;
+};
 
 /**
  * Inflight graph is a state machine for locomotion.
@@ -62,7 +76,11 @@ public:
 
 	void SetRootNode(UInflightState* Node);
 
-	void RegisterInputBinding(const FName Trigger);
+	// Register a manual binding that must be activated by individual states.
+	void RegisterInputBinding(const FName BindingName);
+
+	// Register an automatic binding that will persist for all states.
+	void RegisterInputBinding(ETriggerEvent Trigger, FName Function);
 #endif
 
 	virtual void RebuildGraph() {}
@@ -75,7 +93,7 @@ public:
 	UInflightGraphNodeBase* K2_AddNode(UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UInflightGraphNodeBase> NodeClass, FString Name);
 
 	// Try to mark this object instance as a ActiveGraph.
-	bool TryActivate(APawn* Owner, UInputComponent* InInputComponent);
+	bool TryActivate(APawn* Owner, UEnhancedInputComponent* InInputComponent);
 
 	void Deactivate();
 
@@ -116,6 +134,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
 	TObjectPtr<UInflightState> RootNode;
 
+	// @todo should be TMap of NodeID (FGuid) to Nodes
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph")
 	TArray<TObjectPtr<UInflightGraphNodeBase>> AllNodes;
 
@@ -127,6 +146,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inflight Graph Config")
 	TMap<FName, TObjectPtr<UInputAction>> RegisteredInputNames;
+
+	UPROPERTY()
+	TArray<FInflightInputBinding> AutomaticInputBindings;
 
 #if WITH_EDITORONLY_DATA
 private:
@@ -151,5 +173,9 @@ protected:
 	TObjectPtr<UInflightState> ActiveState;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight Graph|Runtime")
-	TObjectPtr<UInputComponent> InputComponent = nullptr;
+	TObjectPtr<UEnhancedInputComponent> InputComponent = nullptr;
+
+	// Handles for automatically bound input. Used to remove input when graph is deactivated.
+	UPROPERTY()
+	TArray<uint32> BindingHandles;
 };
