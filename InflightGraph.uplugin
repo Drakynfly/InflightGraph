@@ -23,7 +23,7 @@
 		{
 			"Name": "InflightGraphEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault"
 		}
 	],
 	"Plugins": [
