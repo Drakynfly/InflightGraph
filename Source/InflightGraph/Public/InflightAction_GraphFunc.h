@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "InflightActionBase.h"
 #include "InflightAction_GraphFunc.generated.h"
 

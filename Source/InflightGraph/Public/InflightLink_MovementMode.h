@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "InflightLinkBase.h"
 #include "InflightLink_MovementMode.generated.h"
 

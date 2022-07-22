@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "AssetTypeActions_Base.h"
 
 class INFLIGHTGRAPHEDITOR_API FAssetTypeActions_InflightGraph : public FAssetTypeActions_Base

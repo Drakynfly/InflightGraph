@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Factories/Factory.h"
 #include "InflightGraph.h"
 #include "InflightGraphFactory.generated.h"
