@@ -16,7 +16,7 @@ struct FInflightInputBinding
 	GENERATED_BODY()
 
 	UPROPERTY()
-	ETriggerEvent Trigger;
+	ETriggerEvent Trigger = ETriggerEvent::None;
 
 	UPROPERTY()
 	FName FunctionName;

@@ -15,7 +15,7 @@ struct FLinkActionBinding
 	FName LinkName;
 
 	UPROPERTY()
-	ETriggerEvent Trigger;
+	ETriggerEvent Trigger = ETriggerEvent::None;
 };
 
 /**
