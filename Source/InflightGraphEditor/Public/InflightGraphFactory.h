@@ -13,7 +13,7 @@ class INFLIGHTGRAPHEDITOR_API UInflightGraphFactory : public UFactory
 
 public:
 	UInflightGraphFactory();
-	virtual ~UInflightGraphFactory();
+	virtual ~UInflightGraphFactory() override;
 
 	UPROPERTY(EditAnywhere, Category=DataAsset)
 	TSubclassOf<UInflightGraph> InflightGraphClass;

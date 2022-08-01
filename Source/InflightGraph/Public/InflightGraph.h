@@ -9,7 +9,6 @@
 class UEnhancedInputComponent;
 class UInflightState;
 
-
 USTRUCT()
 struct FInflightInputBinding
 {
