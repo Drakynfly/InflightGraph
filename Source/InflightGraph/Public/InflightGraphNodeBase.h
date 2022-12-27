@@ -18,7 +18,7 @@ class INFLIGHTGRAPH_API UInflightGraphNodeBase : public UObject
 public:
 	FString GetNodeName() { return Name; }
 
-	UInflightGraph* GetGraph() const { return !Graph.IsNullNoResolve() ? Graph : nullptr; }
+	UInflightGraph* GetGraph() const { return Graph; }
 
 	void AddParentLink(UInflightGraphNodeBase* Node, UInflightLinkBase* Link);
 
