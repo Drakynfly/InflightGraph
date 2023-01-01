@@ -27,7 +27,7 @@ void UInflightLink_MovementMode::OnDeactivated()
 {
 	Super::OnDeactivated();
 
-	if (const auto Character = Graph->GetTypedOuter<ACharacter>())
+	if (auto&& Character = Graph->GetTypedOuter<ACharacter>())
 	{
 		Character->MovementModeChangedDelegate.RemoveAll(this);
 	}

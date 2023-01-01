@@ -245,7 +245,7 @@ UInflightGraphNodeBase* UInflightGraph::FindNodeByName(TSubclassOf<UInflightGrap
 
 void UInflightGraph::RemoteTriggerAction(const FString& Name)
 {
-	const auto NamedNode = FindNodeByName<UInflightActionBase>(Name);
+	auto&& NamedNode = FindNodeByName<UInflightActionBase>(Name);
 
 	if (IsValid(NamedNode) && NamedNode->IsActive())
 	{
