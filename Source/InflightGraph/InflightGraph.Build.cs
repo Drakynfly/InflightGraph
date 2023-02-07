@@ -7,7 +7,6 @@ public class InflightGraph : ModuleRules
 	public InflightGraph(ReadOnlyTargetRules Target) : base(Target)
     {
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		bUseUnity = false;
 
 		PublicDependencyModuleNames.AddRange(
 			new []

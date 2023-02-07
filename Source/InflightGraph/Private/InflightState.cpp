@@ -54,7 +54,7 @@ void UInflightState::OnDeactivated_Implementation()
 {
 	UE_LOG(LogInflightGraph, Log, TEXT("State ending active: %s"), *Name)
 
-	for (auto ChildNode : ChildrenNodes)
+	for (auto&& ChildNode : ChildrenNodes)
 	{
 		if (IsValid(ChildNode))
 		{

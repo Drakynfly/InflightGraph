@@ -45,7 +45,7 @@ void UInflightGraph::ExecRebuildGraph()
 	RebuildGraph();
 
 	// Auto-fill cached values for rebuilt keys.
-	for (auto PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
+	for (auto&& PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
 	{
 		if (RegisteredInputNames.Contains(PreviouslyRegisteredInput.Key))
 		{
