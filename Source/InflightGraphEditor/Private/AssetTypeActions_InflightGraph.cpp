@@ -13,7 +13,7 @@ FAssetTypeActions_InflightGraph::FAssetTypeActions_InflightGraph(const EAssetTyp
 
 FText FAssetTypeActions_InflightGraph::GetName() const
 {
-	return LOCTEXT("FInflightGraphAssetTypeActionsName", "Inflight Graph");
+	return LOCTEXT("InflightGraphAssetTypeActionsName", "Inflight Graph");
 }
 
 FColor FAssetTypeActions_InflightGraph::GetTypeColor() const
