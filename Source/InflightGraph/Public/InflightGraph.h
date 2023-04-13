@@ -149,11 +149,6 @@ protected:
 	UPROPERTY()
 	TArray<FInflightInputBinding> AutomaticInputBindings;
 
-#if WITH_EDITORONLY_DATA
-private:
-	TMap<FName, TObjectPtr<UInputAction>> RegisteredInputNames_REBUILDDATA;
-#endif
-
 
 	///////////////////////////////////////////////////////////////
 	///					RUNTIME DATA							///

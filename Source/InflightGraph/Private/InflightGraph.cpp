@@ -36,7 +36,7 @@ void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
 void UInflightGraph::ExecRebuildGraph()
 {
 	// Cache Rebuild Data
-	RegisteredInputNames_REBUILDDATA = RegisteredInputNames;
+	TMap<FName, TObjectPtr<UInputAction>> RegisteredInputNames_REBUILDDATA = RegisteredInputNames;
 
 	// Empty all permanent caches.
 	ClearGraph();
@@ -61,6 +61,7 @@ void UInflightGraph::ClearGraph()
 	AllNodes.Empty();
 	RootNode = nullptr;
 	RegisteredInputNames.Empty();
+	AutomaticInputBindings.Empty();
 }
 
 UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString& Name)
@@ -83,7 +84,8 @@ UInflightLinkBase* UInflightGraph::CreateLink(const TSubclassOf<UInflightLinkBas
 	return NewLink;
 }
 
-UInflightLinkBase* UInflightGraph::LinkNodes(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name, UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB)
+UInflightLinkBase* UInflightGraph::LinkNodes(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name,
+	UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB)
 {
 	UInflightLinkBase* NewLink = CreateLink(LinkClass, Name);
 	LinkNodes(NewLink, NodeA, NodeB);
@@ -119,14 +121,14 @@ void UInflightGraph::OnActivated()
 {
 	if (IsValid(InputComponent))
 	{
-		if (UEnhancedInputComponent* const EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+		if (auto&& EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 		{
+			// For some reason if we try to pass "this" directly into the BindAction call it tries to compile the
+			// templated version that expects a function pointer instead of a FName, so we need to do this . . .
+			UObject* Target = this;
+
 			for (const FInflightInputBinding& InputBinding : AutomaticInputBindings)
 			{
-				// For some reason if we try to pass "this" directly into the BindAction call it tries to compile the
-				// templated version that expects a function pointer instead of a FName, so we need to do this . . .
-				UObject* Target = this;
-
 				if (const UInputAction* Action = GetRegisteredAction(InputBinding.FunctionName))
 				{
 					uint32 NewBinding = EnhancedInput->BindAction(Action,
@@ -141,7 +143,7 @@ void UInflightGraph::OnActivated()
 
 void UInflightGraph::OnDeactivated()
 {
-	if (UEnhancedInputComponent* const EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
+	if (auto&& EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		for (const uint32 Handle : BindingHandles)
 		{
