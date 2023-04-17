@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "EnhancedInputComponent.h"
+#include "InputTriggers.h"
 #include "InflightLinkBase.h"
 #include "InflightLink_InputAction.generated.h"
 

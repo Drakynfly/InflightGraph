@@ -1,8 +1,11 @@
 // Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "InflightLink_InputAction.h"
+
 #include "InflightGraph.h"
 #include "InflightGraphModule.h"
+
+#include "EnhancedInputComponent.h"
 
 void UInflightLink_InputAction::OnSetup()
 {

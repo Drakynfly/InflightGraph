@@ -82,6 +82,8 @@ public:
 	void RegisterInputBinding(ETriggerEvent Trigger, FName Function);
 #endif
 
+	APawn* GetActivePawn() const { return ActivePawn; }
+
 	virtual void RebuildGraph() {}
 
 	virtual void OnActivated();

@@ -2,6 +2,8 @@
 
 #include "InflightState.h"
 
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "InflightGraph.h"
 #include "InflightGraphModule.h"
 #include "InflightLinkBase.h"
@@ -23,6 +25,20 @@ void UInflightState::OnTriggered_Implementation()
 void UInflightState::OnActivated_Implementation()
 {
 	UE_LOG(LogInflightGraph, Log, TEXT("State becoming active: %s"), *Name)
+
+	const APlayerController* Controller = GetGraph()->GetActivePawn()->GetController<APlayerController>();
+	if (IsValid(Controller))
+	{
+		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+		if (IsValid(EnhancedSubsystem))
+		{
+			for (auto&& Context : Contexts)
+			{
+				EnhancedSubsystem->AddMappingContext(Context, 0);
+			}
+		}
+	}
 
 	for (UInflightGraphNodeBase* ChildNode : ChildrenNodes)
 	{
@@ -63,6 +79,20 @@ void UInflightState::OnDeactivated_Implementation()
 			if (IsValid(LinkToChild))
 			{
 				LinkToChild->Deactivate();
+			}
+		}
+	}
+
+	const APlayerController* Controller = GetGraph()->GetActivePawn()->GetController<APlayerController>();
+	if (IsValid(Controller))
+	{
+		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+		if (IsValid(EnhancedSubsystem))
+		{
+			for (auto&& Context : Contexts)
+			{
+				EnhancedSubsystem->RemoveMappingContext(Context);
 			}
 		}
 	}

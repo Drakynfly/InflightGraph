@@ -148,13 +148,13 @@ void UInflightGraphNodeBase::OnSetup_Implementation()
 	checkNoEntry();
 }
 
-void UInflightGraphNodeBase::OnDeactivated_Implementation()
+void UInflightGraphNodeBase::OnActivated_Implementation()
 {
 	// This should always be overriden by first level children.
 	checkNoEntry();
 }
 
-void UInflightGraphNodeBase::OnActivated_Implementation()
+void UInflightGraphNodeBase::OnDeactivated_Implementation()
 {
 	// This should always be overriden by first level children.
 	checkNoEntry();

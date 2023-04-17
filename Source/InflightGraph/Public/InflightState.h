@@ -5,6 +5,8 @@
 #include "InflightGraphNodeBase.h"
 #include "InflightState.generated.h"
 
+class UInputMappingContext;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInflightStateTrigger);
 
 /**
@@ -32,4 +34,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Inflight State")
 	FInflightStateTrigger EventOnDeactivated;
+
+//protected:
+	// Input mapping contexts to make active while this state is activated.
+	UPROPERTY()
+	TArray<TObjectPtr<UInputMappingContext>> Contexts;
 };
