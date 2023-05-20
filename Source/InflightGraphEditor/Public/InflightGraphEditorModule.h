@@ -4,15 +4,12 @@
 
 #include "Modules/ModuleManager.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogInflightGraph, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogInflightGraphEditor, Log, All);
 
-/**
- * The public interface to this module
- */
-class FInflightGraph : public IModuleInterface
+class FInflightGraphEditor : public IModuleInterface
 {
-
 public:
+	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 };

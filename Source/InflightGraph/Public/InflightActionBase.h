@@ -1,21 +1,17 @@
-// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #pragma once
 
-#include "InflightGraphNodeBase.h"
+#include "InflightNodeBase.h"
 #include "InflightActionBase.generated.h"
 
 /**
- * Actions are triggerable events that fire one-off abilities.
+ * Actions fire one-off events.
  */
 UCLASS(Abstract, Blueprintable)
-class INFLIGHTGRAPH_API UInflightActionBase : public UInflightGraphNodeBase
+class INFLIGHTGRAPH_API UInflightActionBase : public UInflightNodeBase
 {
 	GENERATED_BODY()
 
-public:
-	virtual void OnSetup_Implementation() override;
-	virtual void OnTriggered_Implementation() override;
-	virtual void OnActivated_Implementation() override;
-	virtual void OnDeactivated_Implementation() override;
+protected:
 };

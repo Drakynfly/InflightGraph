@@ -1,10 +1,10 @@
 // Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "InflightBlueprintFunctionLibrary.h"
-#include "EnhancedInputComponent.h"
+#include "InflightGraph.h"
 #include "GameFramework/Character.h"
 
-UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter* Owner, UInflightGraph* InflightAsset, UEnhancedInputComponent* InputComponent)
+UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter* Owner, UInflightGraph* InflightAsset, AController* Controller)
 {
 	if (IsValid(Owner) && IsValid(InflightAsset))
 	{
@@ -13,9 +13,9 @@ UInflightGraph* UInflightBlueprintFunctionLibrary::StartInflightGraph(ACharacter
 
 		if (IsValid(LiveGraph))
 		{
-			if (IsValid(InputComponent))
+			if (IsValid(Controller))
 			{
-				LiveGraph->TryActivate(Owner, InputComponent);
+				LiveGraph->TryActivate(Owner, Controller);
 			}
 
 			return LiveGraph;

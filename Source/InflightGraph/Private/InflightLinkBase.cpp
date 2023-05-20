@@ -1,74 +1,36 @@
-// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "InflightLinkBase.h"
-#include "InflightGraph.h"
-#include "InflightGraphModule.h"
+#include "InflightNodeBase.h"
 
-void UInflightLinkBase::SetName(const FString& InName)
+void UInflightLinkBase::OnActivated_Implementation()
 {
-	Name = InName;
-}
-
-void UInflightLinkBase::Setup(UInflightGraph* InflightGraph, UInflightGraphNodeBase* NodeA,
-                              UInflightGraphNodeBase* NodeB)
-{
-	Graph = InflightGraph;
-	StartNodes.AddUnique(NodeA);
-	EndNodes.AddUnique(NodeB);
-
-	OnSetup();
-}
-
-void UInflightLinkBase::Activate()
-{
-	for (auto&& EndNode : EndNodes)
+	for (auto&& Node : GetLinkedNodes())
 	{
-		if (IsValid(EndNode))
-		{
-			EndNode->AddActivationTrigger(this);
-		}
+		if (!IsValid(Node)) return;
+
+		//Node->AddActivationTrigger(this);
 	}
-
-	OnActivated();
 }
 
-void UInflightLinkBase::Deactivate()
+void UInflightLinkBase::OnDeactivated_Implementation()
 {
-	for (auto&& EndNode : EndNodes)
+	for (auto&& Node : GetLinkedNodes())
 	{
-		if (IsValid(EndNode))
-		{
-			EndNode->RemoveActivationTrigger(this);
-		}
+		if (!IsValid(Node)) return;
+
+		//Node->RemoveActivationTrigger(this);
 	}
-
-	OnDeactivated();
 }
 
-void UInflightLinkBase::Trigger()
+void UInflightLinkBase::OnTriggered_Implementation()
 {
-	OnTriggered();
-}
-
-void UInflightLinkBase::OnSetup()
-{
-}
-
-void UInflightLinkBase::OnActivated()
-{
-}
-
-void UInflightLinkBase::OnDeactivated()
-{
-}
-
-void UInflightLinkBase::OnTriggered()
-{
-	for (auto&& EndNode : EndNodes)
+	for (auto&& Node : GetLinkedNodes())
 	{
-		if (IsValid(EndNode))
-		{
-			EndNode->Trigger();
-		}
+		if (!IsValid(Node)) return;
+
+		Node->AddActivationTrigger(this);
+		Node->Trigger();
+		Node->RemoveActivationTrigger(this);
 	}
 }

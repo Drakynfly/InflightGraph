@@ -13,24 +13,28 @@
 	"EnabledByDefault": true,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "InflightGraph",
 			"Type": "Runtime",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "InflightGraphEditor",
 			"Type": "Editor",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "EnhancedInput",
 			"Enabled": true
+		},
+		{
+			"Name": "Heart",
+			"Enabled": true
 		}
-	],
-	"IsExperimentalVersion": false
+	]
 }

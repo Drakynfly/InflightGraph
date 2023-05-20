@@ -1,19 +1,19 @@
 // Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
-
 #include "InflightLink_MovementMode.h"
+
 #include "InflightGraph.h"
 #include "InflightGraphModule.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-void UInflightLink_MovementMode::OnActivated()
+void UInflightLink_MovementMode::OnActivated_Implementation()
 {
-	Super::OnActivated();
+	Super::OnActivated_Implementation();
 
-	UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" Activated"), *Name)
+	UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" Activated"), *GetName())
 
-	if (ACharacter* Character = Graph->GetTypedOuter<ACharacter>())
+	if (ACharacter* Character = Cast<ACharacter>(GetOuterUInflightGraph()->GetActivePawn()))
 	{
 		Character->MovementModeChangedDelegate.AddDynamic(this, &UInflightLink_MovementMode::ModeTrigger);
 	}
@@ -23,11 +23,11 @@ void UInflightLink_MovementMode::OnActivated()
 	}
 }
 
-void UInflightLink_MovementMode::OnDeactivated()
+void UInflightLink_MovementMode::OnDeactivated_Implementation()
 {
-	Super::OnDeactivated();
+	Super::OnDeactivated_Implementation();
 
-	if (auto&& Character = Graph->GetTypedOuter<ACharacter>())
+	if (ACharacter* Character = Cast<ACharacter>(GetOuterUInflightGraph()->GetActivePawn()))
 	{
 		Character->MovementModeChangedDelegate.RemoveAll(this);
 	}
@@ -39,7 +39,7 @@ void UInflightLink_MovementMode::ModeTrigger(ACharacter* Character, EMovementMod
 {
 	if (ListeningMode == Cast<UCharacterMovementComponent>(Character->GetMovementComponent())->MovementMode)
 	{
-		UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" ListeningMode detected"), *Name)
+		UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" ListeningMode detected"), *GetName())
 		Trigger();
 	}
 }

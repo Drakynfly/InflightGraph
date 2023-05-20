@@ -13,7 +13,8 @@ public class InflightGraphEditor : ModuleRules
 			{
 				"Core",
 				"CoreUObject",
-                "Engine",
+				"Engine",
+				"Heart",
                 "UnrealEd"
 			});
 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "InputTriggers.h"
 #include "InflightLinkBase.h"
+#include "InputTriggers.h"
 #include "InflightLink_InputAction.generated.h"
 
 USTRUCT()
@@ -11,10 +11,10 @@ struct FLinkActionBinding
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	FName LinkName;
+	UPROPERTY(EditAnywhere, Category = "LinkActionBinding")
+	TObjectPtr<UInputAction> Input;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = "LinkActionBinding")
 	ETriggerEvent Trigger = ETriggerEvent::None;
 };
 
@@ -26,15 +26,17 @@ class INFLIGHTGRAPH_API UInflightLink_InputAction : public UInflightLinkBase
 {
 	GENERATED_BODY()
 
-	virtual void OnSetup() override;
-	virtual void OnActivated() override;
-	virtual void OnDeactivated() override;
-	virtual void OnTriggered() override;
+public:
+	UInflightLink_InputAction();
+
+protected:
+	virtual void OnActivated_Implementation() override;
+	virtual void OnDeactivated_Implementation() override;
+	virtual void OnTriggered_Implementation() override;
 
 	void ActionTrigger(const FInputActionValue& ActionValue);
 
-public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	FLinkActionBinding ActionBinding;
 
 private:

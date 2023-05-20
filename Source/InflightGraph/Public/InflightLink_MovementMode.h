@@ -14,8 +14,8 @@ class INFLIGHTGRAPH_API UInflightLink_MovementMode : public UInflightLinkBase
 	GENERATED_BODY()
 
 protected:
-	virtual void OnActivated() override;
-	virtual void OnDeactivated() override;
+	virtual void OnActivated_Implementation() override;
+	virtual void OnDeactivated_Implementation() override;
 
 	UFUNCTION()
 	void ModeTrigger(class ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);

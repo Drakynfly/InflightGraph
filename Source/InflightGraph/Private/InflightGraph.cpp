@@ -1,180 +1,46 @@
-// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
+﻿// Copyright Guy (Drakynfly) Lundvall. All Rights Reserved.
 
 #include "InflightGraph.h"
+#include "InflightGraphModule.h"
+#include "InflightGraphSchema.h"
+#include "InflightState.h"
 
 #include "EnhancedInputComponent.h"
-#include "InflightActionBase.h"
-#include "InflightLinkBase.h"
-#include "InflightGraphModule.h"
-#include "InflightState.h"
-#include "UObject/ObjectSaveContext.h"
-
-#define LOCTEXT_NAMESPACE "InflightGraph"
+#include "InflightGraphNode_State.h"
 
 UInflightGraph::UInflightGraph()
 {
-}
-
-#if WITH_EDITOR
-void UInflightGraph::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	UObject::PostEditChangeProperty(PropertyChangedEvent);
-
-
-}
-
-void UInflightGraph::PreSave(const FObjectPreSaveContext SaveContext)
-{
-	if (IsAsset())
-	{
-		ExecRebuildGraph();
-	}
-
-	UObject::PreSave(SaveContext);
-}
-
-void UInflightGraph::ExecRebuildGraph()
-{
-	// Cache Rebuild Data
-	TMap<FName, TObjectPtr<UInputAction>> RegisteredInputNames_REBUILDDATA = RegisteredInputNames;
-
-	// Empty all permanent caches.
-	ClearGraph();
-
-	// Hook for child class to construct all nodes and links.
-	RebuildGraph();
-
-	// Auto-fill cached values for rebuilt keys.
-	for (auto&& PreviouslyRegisteredInput : RegisteredInputNames_REBUILDDATA)
-	{
-		if (RegisteredInputNames.Contains(PreviouslyRegisteredInput.Key))
-		{
-			RegisteredInputNames.Add(PreviouslyRegisteredInput);
-		}
-	}
-
-	RegisteredInputNames_REBUILDDATA.Empty();
-}
-
-void UInflightGraph::ClearGraph()
-{
-	AllNodes.Empty();
-	RootNode = nullptr;
-	RegisteredInputNames.Empty();
-	AutomaticInputBindings.Empty();
-}
-
-UInflightGraphNodeBase* UInflightGraph::AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString& Name)
-{
-	UInflightGraphNodeBase* NewNode = NewObject<UInflightGraphNodeBase>(this, NodeClass);
-
-	NewNode->Setup(this, Name);
-
-	AllNodes.Add(NewNode);
-
-	return NewNode;
-}
-
-UInflightLinkBase* UInflightGraph::CreateLink(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name)
-{
-	UInflightLinkBase* NewLink = NewObject<UInflightLinkBase>(this, LinkClass);
-
-	NewLink->SetName(Name);
-
-	return NewLink;
-}
-
-UInflightLinkBase* UInflightGraph::LinkNodes(const TSubclassOf<UInflightLinkBase> LinkClass, const FString& Name,
-	UInflightGraphNodeBase* NodeA, UInflightGraphNodeBase* NodeB)
-{
-	UInflightLinkBase* NewLink = CreateLink(LinkClass, Name);
-	LinkNodes(NewLink, NodeA, NodeB);
-	return NewLink;
-}
-
-void UInflightGraph::LinkNodes(UInflightLinkBase* LinkObject, UInflightGraphNodeBase* NodeA,
-	UInflightGraphNodeBase* NodeB)
-{
-	LinkObject->Setup(this, NodeA, NodeB);
-	NodeA->AddChildLink(NodeB, LinkObject);
-	NodeB->AddParentLink(NodeA, LinkObject);
-}
-
-void UInflightGraph::SetRootNode(UInflightState* Node)
-{
-	RootNode = Node;
-}
-
-void UInflightGraph::RegisterInputBinding(const FName BindingName)
-{
-	RegisteredInputNames.Add(BindingName);
-}
-
-void UInflightGraph::RegisterInputBinding(const ETriggerEvent Trigger, const FName Function)
-{
-	RegisteredInputNames.Add(Function);
-	AutomaticInputBindings.Add({Trigger, Function});
-}
-#endif
-
-void UInflightGraph::OnActivated()
-{
-	if (IsValid(InputComponent))
-	{
-		if (auto&& EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
-		{
-			// For some reason if we try to pass "this" directly into the BindAction call it tries to compile the
-			// templated version that expects a function pointer instead of a FName, so we need to do this . . .
-			UObject* Target = this;
-
-			for (const FInflightInputBinding& InputBinding : AutomaticInputBindings)
-			{
-				if (const UInputAction* Action = GetRegisteredAction(InputBinding.FunctionName))
-				{
-					uint32 NewBinding = EnhancedInput->BindAction(Action,
-								InputBinding.Trigger, Target, InputBinding.FunctionName).GetHandle();
-
-					BindingHandles.Add(NewBinding);
-				}
-			}
-		}
-	}
-}
-
-void UInflightGraph::OnDeactivated()
-{
-	if (auto&& EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		for (const uint32 Handle : BindingHandles)
-		{
-			EnhancedInput->RemoveBindingByHandle(Handle);
-		}
-	}
-}
-
-UInflightGraphNodeBase* UInflightGraph::K2_AddNode(const TSubclassOf<UInflightGraphNodeBase> NodeClass, const FString Name)
-{
-#if WITH_EDITOR
-	return AddNode(NodeClass, Name);
-#else
-	return nullptr;
+#if WITH_EDITORONLY_DATA
+	EditorData.GraphTypeName = FText::FromString("Inflight");
+	EditorData.CanCreateAssetFromFactory = true;
 #endif
 }
 
-bool UInflightGraph::TryActivate(APawn* Owner, UEnhancedInputComponent* InInputComponent)
+TSubclassOf<UHeartGraphSchema> UInflightGraph::GetSchemaClass_Implementation() const
 {
-	//InflightState* StartingNode = DetermineStartingNode();
+	return UInflightGraphSchema::StaticClass();
+}
 
-	if (!IsAsset() && !ActiveGraph && IsValid(RootNode) && IsValid(InInputComponent))
+bool UInflightGraph::TryActivate(APawn* Owner, AController* Controller)
+{
+	if (!IsAsset() &&
+		!IsTemplate() &&
+		!ActiveGraph &&
+		IsValid(RootState) &&
+		IsValid(Owner) &&
+		IsValid(Controller))
 	{
 		ActiveGraph = true;
 		ActivePawn = Owner;
-		InputComponent = InInputComponent;
-		//SetActiveState(StartingNode);
-		SetActiveState(RootNode);
-		OnActivated();
 
-		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *InputComponent->GetName())
+		InputComponent = Controller->InputComponent;
+		SetupInputComponent();
+
+		ActivePawn->ReceiveControllerChangedDelegate.AddDynamic(this, &ThisClass::OnControllerChanged);
+
+		SetActiveState(RootState);
+
+		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *Controller->GetName())
 	}
 
 	return ActiveGraph;
@@ -182,17 +48,15 @@ bool UInflightGraph::TryActivate(APawn* Owner, UEnhancedInputComponent* InInputC
 
 void UInflightGraph::Deactivate()
 {
-	if (!IsAsset() && ActiveGraph)
+	if (ensure(ActiveGraph))
 	{
 		SetActiveState(nullptr);
-		OnDeactivated();
 
 		ActiveGraph = false;
 		ActivePawn = nullptr;
 		InputComponent = nullptr;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s deactivated!"), *GetName())
-
 	}
 }
 
@@ -221,60 +85,63 @@ bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
 	return false;
 }
 
-UInputAction* UInflightGraph::GetRegisteredAction(const FName BindingName) const
+void UInflightGraph::SetupInputComponent()
 {
-	if (!RegisteredInputNames.Contains(BindingName)) return nullptr;
-	return RegisteredInputNames.FindChecked(BindingName);
-}
-
-UInflightGraphNodeBase* UInflightGraph::FindNodeByNameImpl(const FString& Name)
-{
-	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
+	if (auto&& EnhancedInput = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		if (Node && Node->GetNodeName() == Name)
+		/*
+		// For some reason if we try to pass "this" directly into the BindAction call it tries to compile the
+		// templated version that expects a function pointer instead of a FName, so we need to do this . . .
+		UObject* Target = this;
+
+		for (const FInflightInputBinding& InputBinding : AutomaticInputBindings)
 		{
-			return Node;
+			if (const UInputAction* Action = GetRegisteredAction(InputBinding.FunctionName))
+			{
+				uint32 NewBinding = EnhancedInput->BindAction(Action,
+							InputBinding.Trigger, Target, InputBinding.FunctionName).GetHandle();
+
+				BindingHandles.Add(NewBinding);
+			}
 		}
+		*/
 	}
-
-	return nullptr;
 }
 
-UInflightGraphNodeBase* UInflightGraph::FindNodeByName(TSubclassOf<UInflightGraphNodeBase> Class, const FString& Name)
+void UInflightGraph::OnControllerChanged(APawn* Pawn, AController* OldController, AController* NewController)
 {
-	return FindNodeByNameImpl(Name);
-}
+	// @todo we need to rebind anything that was bound to the old inputcomponent
 
-void UInflightGraph::RemoteTriggerAction(const FString& Name)
-{
-	auto&& NamedNode = FindNodeByName<UInflightActionBase>(Name);
+	InputComponent = nullptr;
 
-	if (IsValid(NamedNode) && NamedNode->IsActive())
+	if (NewController)
 	{
-		NamedNode->Trigger();
+		InputComponent = NewController->InputComponent;
 	}
+
+	SetupInputComponent();
 }
 
 #if WITH_EDITOR
-TArray<FString> UInflightGraph::GetStatesList()
+TArray<FString> UInflightGraph::GetRootNodeOptions() const
 {
-	TArray<FString> States;
+	TArray<FString> StateNames;
 
-	for (const TObjectPtr<UInflightGraphNodeBase>& Node : AllNodes)
+	TArray<UHeartGraphNode*> AllNodes;
+	GetNodeArray(AllNodes);
+	for (auto&& Node : AllNodes)
 	{
-		if (Node && Node->IsA<UInflightState>())
+		if (UInflightState* AsState = Node->GetNodeObject<UInflightState>())
 		{
-			States.Add(Node->GetNodeName());
+			StateNames.AddUnique(AsState->GetStateName());
 		}
 	}
 
-	if (States.IsEmpty())
-	{
-		return {FString("No States to select")};
-	}
+	return StateNames;
+}
 
-	return States;
+void UInflightGraph::SetRootState(UInflightState* State)
+{
+	RootState = State;
 }
 #endif
-
-#undef LOCTEXT_NAMESPACE

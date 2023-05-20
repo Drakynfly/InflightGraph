@@ -6,7 +6,7 @@
 #include "InflightAction_OwningFunc.generated.h"
 
 /**
- * A Graph Action that calls a function on the graph's owning actor.
+ * A Graph Action that calls a function on the graph's owning pawn.
  */
 UCLASS()
 class INFLIGHTGRAPH_API UInflightAction_OwningFunc : public UInflightActionBase
@@ -16,6 +16,7 @@ class INFLIGHTGRAPH_API UInflightAction_OwningFunc : public UInflightActionBase
 public:
 	virtual void OnTriggered_Implementation() override;
 
-	UPROPERTY()
+protected:
+	UPROPERTY(EditAnywhere)
 	FName FunctionName;
 };

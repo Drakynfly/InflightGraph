@@ -14,7 +14,9 @@ public class InflightGraph : ModuleRules
 				"Core",
 				"CoreUObject",
                 "Engine",
-                "EnhancedInput"
+                "EnhancedInput",
+                "GameplayTags",
+                "Heart"
 			});
 
 		PrivateDependencyModuleNames.AddRange(

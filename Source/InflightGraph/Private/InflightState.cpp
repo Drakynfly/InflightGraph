@@ -2,21 +2,23 @@
 
 #include "InflightState.h"
 
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InflightGraph.h"
 #include "InflightGraphModule.h"
 #include "InflightLinkBase.h"
 
-void UInflightState::OnSetup_Implementation()
+#define LOCTEXT_NAMESPACE "InflightState"
+
+UInflightState::UInflightState()
 {
+	GetInflightNodeSparse()->NodeTitle = LOCTEXT("NodeTitle_State", "State");
 }
 
 void UInflightState::OnTriggered_Implementation()
 {
-	if (!Graph->SetActiveState(this))
+	if (!GetOuterUInflightGraph()->SetActiveState(this))
 	{
-		UE_LOG(LogInflightGraph, Warning, TEXT("State \"%s\" failed to set as active"), *Name)
+		UE_LOG(LogInflightGraph, Warning, TEXT("State \"%s\" failed to set as active"), *StateName)
 	}
 
 	EventOnTriggered.Broadcast();
@@ -24,43 +26,27 @@ void UInflightState::OnTriggered_Implementation()
 
 void UInflightState::OnActivated_Implementation()
 {
-	UE_LOG(LogInflightGraph, Log, TEXT("State becoming active: %s"), *Name)
+	UE_LOG(LogInflightGraph, Log, TEXT("State becoming active: %s"), *StateName)
 
-	const APlayerController* Controller = GetGraph()->GetActivePawn()->GetController<APlayerController>();
+	const APlayerController* Controller = GetOuterUInflightGraph()->GetActivePawn()->GetController<APlayerController>();
 	if (IsValid(Controller))
 	{
 		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 		if (IsValid(EnhancedSubsystem))
 		{
-			for (auto&& Context : Contexts)
+			for (auto&& Mapping : Mappings)
 			{
-				EnhancedSubsystem->AddMappingContext(Context, 0);
+				EnhancedSubsystem->AddMappingContext(Mapping, 0);
 			}
 		}
 	}
 
-	for (UInflightGraphNodeBase* ChildNode : ChildrenNodes)
+	for (auto&& Node : GetLinkedNodes())
 	{
-		if (IsValid(ChildNode))
-		{
-			UInflightLinkBase* ChildLink = GetChildLink(ChildNode);
+		if (!IsValid(Node)) continue;
 
-			if (IsValid(ChildLink))
-			{
-				UE_LOG(LogInflightGraph, Log, TEXT("     Child of state: %s. Link to state: %s"), *ChildNode->GetNodeName(), *ChildLink->GetLinkName())
-
-				ChildLink->Activate();
-			}
-			else
-			{
-				UE_LOG(LogInflightGraph, Error, TEXT("     Unable to find child link for node: %s"), *ChildNode->GetNodeName());
-			}
-		}
-		else
-		{
-			UE_LOG(LogInflightGraph, Error, TEXT("     ChildNode in Children Nodes is invalid!"));
-		}
+		Node->AddActivationTrigger(this);
 	}
 
 	EventOnActivated.Broadcast();
@@ -68,34 +54,48 @@ void UInflightState::OnActivated_Implementation()
 
 void UInflightState::OnDeactivated_Implementation()
 {
-	UE_LOG(LogInflightGraph, Log, TEXT("State ending active: %s"), *Name)
+	UE_LOG(LogInflightGraph, Log, TEXT("State ending active: %s"), *StateName)
 
-	for (auto&& ChildNode : ChildrenNodes)
+	for (auto&& Node : GetLinkedNodes())
 	{
-		if (IsValid(ChildNode))
-		{
-			UInflightLinkBase* LinkToChild = GetChildLink(ChildNode);
+		if (!IsValid(Node)) continue;
 
-			if (IsValid(LinkToChild))
-			{
-				LinkToChild->Deactivate();
-			}
-		}
+		Node->RemoveActivationTrigger(this);
 	}
 
-	const APlayerController* Controller = GetGraph()->GetActivePawn()->GetController<APlayerController>();
+	const APlayerController* Controller = GetOuterUInflightGraph()->GetActivePawn()->GetController<APlayerController>();
 	if (IsValid(Controller))
 	{
 		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 		if (IsValid(EnhancedSubsystem))
 		{
-			for (auto&& Context : Contexts)
+			for (auto&& Mapping : Mappings)
 			{
-				EnhancedSubsystem->RemoveMappingContext(Context);
+				EnhancedSubsystem->RemoveMappingContext(Mapping);
 			}
 		}
 	}
 
 	EventOnDeactivated.Broadcast();
 }
+
+FString UInflightState::GetStateName() const
+{
+	if (StateName.IsEmpty())
+	{
+		return "<BLANK>";
+	}
+	return StateName;
+}
+
+FText UInflightState::GetStateTitle() const
+{
+	if (StateTitle.IsEmpty())
+	{
+		return FText::AsCultureInvariant("<BLANK>");
+	}
+	return StateTitle;
+}
+
+#undef LOCTEXT_NAMESPACE
