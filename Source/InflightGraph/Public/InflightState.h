@@ -23,9 +23,9 @@ public:
 	UInflightState();
 
 protected:
-	virtual void OnTriggered_Implementation() override;
 	virtual void OnActivated_Implementation() override;
 	virtual void OnDeactivated_Implementation() override;
+	virtual void OnTriggered_Implementation(const FInputActionValue& ActionValue) override;
 
 public:
 	FString GetStateName() const;

@@ -14,7 +14,7 @@ class INFLIGHTGRAPH_API UInflightAction_OwningFunc : public UInflightActionBase
 	GENERATED_BODY()
 
 public:
-	virtual void OnTriggered_Implementation() override;
+	virtual void OnTriggered_Implementation(const FInputActionValue& ActionValue) override;
 
 protected:
 	UPROPERTY(EditAnywhere)

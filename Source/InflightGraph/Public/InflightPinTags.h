@@ -3,27 +3,13 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
-#include "Model/HeartGraphPinTag.h"
-
-// Pin tags for Inflight Nodes
-struct FInflightPinTags : public FGameplayTagNativeAdder
-{
-	FORCEINLINE static const FInflightPinTags& Get()
-	{
-		return InflightPinTags;
-	}
-
-	virtual void AddTags() override;
-
-	FHeartGraphPinTag Activation;
-	FHeartGraphPinTag Trigger;
-
-private:
-	static FInflightPinTags InflightPinTags;
-};
+#include "NativeGameplayTags.h"
 
 namespace Inflight::Pins
 {
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Activation)
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Trigger)
+
 	static const FName OnWake(TEXT("OnWake"));
 	static const FName Triggered(TEXT("Triggered"));
 }

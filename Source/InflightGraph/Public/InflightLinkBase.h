@@ -16,7 +16,5 @@ class INFLIGHTGRAPH_API UInflightLinkBase : public UInflightNodeBase
 	GENERATED_BODY()
 
 protected:
-	virtual void OnActivated_Implementation() override;
-	virtual void OnDeactivated_Implementation() override;
-	virtual void OnTriggered_Implementation() override;
+	virtual void OnTriggered_Implementation(const FInputActionValue& ActionValue) override;
 };

@@ -32,9 +32,7 @@ public:
 protected:
 	virtual void OnActivated_Implementation() override;
 	virtual void OnDeactivated_Implementation() override;
-	virtual void OnTriggered_Implementation() override;
-
-	void ActionTrigger(const FInputActionValue& ActionValue);
+	virtual void OnTriggered_Implementation(const FInputActionValue& ActionValue) override;
 
 	UPROPERTY(EditAnywhere)
 	FLinkActionBinding ActionBinding;

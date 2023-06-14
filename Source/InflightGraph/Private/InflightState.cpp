@@ -14,21 +14,11 @@ UInflightState::UInflightState()
 	GetInflightNodeSparse()->NodeTitle = LOCTEXT("NodeTitle_State", "State");
 }
 
-void UInflightState::OnTriggered_Implementation()
-{
-	if (!GetOuterUInflightGraph()->SetActiveState(this))
-	{
-		UE_LOG(LogInflightGraph, Warning, TEXT("State \"%s\" failed to set as active"), *StateName)
-	}
-
-	EventOnTriggered.Broadcast();
-}
-
 void UInflightState::OnActivated_Implementation()
 {
 	UE_LOG(LogInflightGraph, Log, TEXT("State becoming active: %s"), *StateName)
 
-	const APlayerController* Controller = GetOuterUInflightGraph()->GetActivePawn()->GetController<APlayerController>();
+	const APlayerController* Controller = GetInflightGraph()->GetActivePawn()->GetController<APlayerController>();
 	if (IsValid(Controller))
 	{
 		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -63,7 +53,7 @@ void UInflightState::OnDeactivated_Implementation()
 		Node->RemoveActivationTrigger(this);
 	}
 
-	const APlayerController* Controller = GetOuterUInflightGraph()->GetActivePawn()->GetController<APlayerController>();
+	const APlayerController* Controller = GetInflightGraph()->GetActivePawn()->GetController<APlayerController>();
 	if (IsValid(Controller))
 	{
 		auto&& EnhancedSubsystem = Controller->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -78,6 +68,16 @@ void UInflightState::OnDeactivated_Implementation()
 	}
 
 	EventOnDeactivated.Broadcast();
+}
+
+void UInflightState::OnTriggered_Implementation(const FInputActionValue& ActionValue)
+{
+	if (!GetInflightGraph()->SetActiveState(this))
+	{
+		UE_LOG(LogInflightGraph, Warning, TEXT("State \"%s\" failed to set as active"), *StateName)
+	}
+
+	EventOnTriggered.Broadcast();
 }
 
 FString UInflightState::GetStateName() const

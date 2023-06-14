@@ -15,4 +15,6 @@ class INFLIGHTGRAPH_API UInflightGraphSchema : public UHeartGraphSchema
 
 public:
 	UInflightGraphSchema();
+
+	virtual FHeartConnectPinsResponse CanPinsConnect_Implementation(const UHeartGraph* Graph, FHeartGraphPinReference PinA, FHeartGraphPinReference PinB) const override;
 };

@@ -5,6 +5,7 @@
 #include "Model/HeartGraph.h"
 #include "InflightGraph.generated.h"
 
+class UInflightStartNode;
 enum class ETriggerEvent : uint8;
 struct FInflightInputBinding;
 class UInflightNodeBase;
@@ -23,6 +24,7 @@ class INFLIGHTGRAPH_API UInflightGraph : public UHeartGraph
 	GENERATED_BODY()
 
 	friend UInflightState;
+	friend class UCompileInflightGraph;
 
 public:
 	UInflightGraph();
@@ -37,6 +39,10 @@ public:
 	bool TryActivate(APawn* Owner, AController* Controller);
 
 	void Deactivate();
+
+	void MarkNodeActive(UInflightNodeBase* Node);
+
+	void MarkNodeInactive(UInflightNodeBase* Node);
 
 protected:
 	// Switch the active state. Will return true if when the NewActiveState has been successfully activated, or false
@@ -59,15 +65,6 @@ private:
 	UFUNCTION()
 	void OnControllerChanged(APawn* Pawn, AController* OldController, AController* NewController);
 
-#if WITH_EDITOR
-	UFUNCTION()
-	TArray<FString> GetRootNodeOptions() const;
-
-public:
-	void SetRootState(UInflightState* State);
-	FString GetRootNode() const { return RootNode; }
-#endif
-
 
 	/**---------------------------------------------------------**/
 	/*						CONFIG DATA							 */
@@ -75,12 +72,7 @@ public:
 	/**---------------------------------------------------------**/
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight|Config")
-	TObjectPtr<UInflightState> RootState;
-
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, Category = "Inflight|Config", meta = (GetOptions = "GetRootNodeOptions"))
-	FString RootNode;
-#endif
+	TObjectPtr<UInflightStartNode> StartNode;
 
 
 	/**---------------------------------------------------------**/
@@ -101,4 +93,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inflight|Runtime")
 	TObjectPtr<UInputComponent> InputComponent = nullptr;
+
+	UPROPERTY()
+	TSet<TWeakObjectPtr<UInflightNodeBase>> AllActiveNodes;
 };

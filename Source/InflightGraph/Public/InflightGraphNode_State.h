@@ -20,7 +20,6 @@ public:
 	virtual FText GetNodeTitle_Implementation(const UObject* Node, EHeartNodeNameContext Context) const override;
 	virtual FText GetNodeCategory_Implementation(const UObject* Node) const override;
 	virtual FLinearColor GetNodeTitleColor_Implementation(const UObject* Node) override;
-	virtual void GetNodeMessages_Implementation(TArray<FHeartGraphNodeMessage>& Messages) const override;
 
 	UFUNCTION(BlueprintCallable, Category = "Inflight|Graph|States")
 	UInflightState* GetStateNode() const;

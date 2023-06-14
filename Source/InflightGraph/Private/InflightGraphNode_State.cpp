@@ -37,22 +37,6 @@ FLinearColor UInflightGraphNode_State::GetNodeTitleColor_Implementation(const UO
 	return FLinearColor(FColor::Cyan);
 }
 
-void UInflightGraphNode_State::GetNodeMessages_Implementation(TArray<FHeartGraphNodeMessage>& Messages) const
-{
-	if (auto&& State = GetStateNode())
-	{
-		const UInflightGraph* Graph = GetOwningGraph<UInflightGraph>();
-
-		if (Graph && State)
-		{
-			if (State->GetStateName() == Graph->GetRootNode())
-			{
-				Messages.Add(FHeartGraphNodeMessage{ LOCTEXT("StateRootNodeMessage", "Root State"), FLinearColor::Blue });
-			}
-		}
-	}
-}
-
 UInflightState* UInflightGraphNode_State::GetStateNode() const
 {
 	return GetNodeObject<UInflightState>();

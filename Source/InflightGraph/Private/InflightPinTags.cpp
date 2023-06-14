@@ -2,10 +2,8 @@
 
 #include "InflightPinTags.h"
 
-FInflightPinTags FInflightPinTags::InflightPinTags;
-
-void FInflightPinTags::AddTags()
+namespace Inflight::Pins
 {
-	Activation = FHeartGraphPinTag::AddNativeTag("Inflight.Activation");
-	Trigger = FHeartGraphPinTag::AddNativeTag("Inflight.Trigger");
+	UE_DEFINE_GAMEPLAY_TAG(Activation, FName{TEXTVIEW("Heart.Pin.Inflight.Activation")})
+	UE_DEFINE_GAMEPLAY_TAG(Trigger, FName{TEXTVIEW("Heart.Pin.Inflight.Trigger")})
 }

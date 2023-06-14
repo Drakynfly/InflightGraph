@@ -18,7 +18,7 @@ protected:
 	virtual void OnDeactivated_Implementation() override;
 
 	UFUNCTION()
-	void ModeTrigger(class ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
+	void ModeTrigger(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
 public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inflight Link")

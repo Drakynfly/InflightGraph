@@ -20,7 +20,13 @@ void UInflightLink_InputAction::OnActivated_Implementation()
 
 	if (!IsValid(ActionBinding.Input))
 	{
-		UE_LOG(LogInflightGraph, Warning, TEXT("InputAction %s InputAction is invalid"), *GetName())
+		UE_LOG(LogInflightGraph, Warning, TEXT("'%s': ActionBinding.InputAction is invalid"), *GetName())
+		return;
+	}
+
+	if (ActionBinding.Trigger == ETriggerEvent::None)
+	{
+		UE_LOG(LogInflightGraph, Warning, TEXT("'%s': ActionBinding.Trigger is 'None'"), *GetName())
 		return;
 	}
 
@@ -28,9 +34,9 @@ void UInflightLink_InputAction::OnActivated_Implementation()
 
 	UE_LOG(LogInflightGraph, Log, TEXT("InputAction binding input to '%s'"), *LinkName);
 
-	if (UEnhancedInputComponent* InputComp = GetOuterUInflightGraph()->GetInputComponent<UEnhancedInputComponent>())
+	if (UEnhancedInputComponent* InputComp = GetInflightGraph()->GetInputComponent<UEnhancedInputComponent>())
 	{
-		InputLinkPtr = &InputComp->BindAction(ActionBinding.Input, ActionBinding.Trigger, this, &ThisClass::ActionTrigger);
+		InputLinkPtr = &InputComp->BindAction(ActionBinding.Input, ActionBinding.Trigger, this, &ThisClass::Trigger);
 	}
 }
 
@@ -40,23 +46,18 @@ void UInflightLink_InputAction::OnDeactivated_Implementation()
 
 	if (InputLinkPtr != nullptr)
 	{
-		if (UEnhancedInputComponent* InputComp = GetOuterUInflightGraph()->GetInputComponent<UEnhancedInputComponent>())
+		if (UEnhancedInputComponent* InputComp = GetInflightGraph()->GetInputComponent<UEnhancedInputComponent>())
 		{
 			InputComp->RemoveBinding(*InputLinkPtr);
 		}
 	}
 }
 
-void UInflightLink_InputAction::OnTriggered_Implementation()
+void UInflightLink_InputAction::OnTriggered_Implementation(const FInputActionValue& ActionValue)
 {
-	Super::OnTriggered_Implementation();
-
 	UE_LOG(LogInflightGraph, Log, TEXT("Link %s binding triggered!"), *ActionBinding.Input.GetName());
-}
 
-void UInflightLink_InputAction::ActionTrigger(const FInputActionValue& ActionValue)
-{
-	Trigger();
+	Super::OnTriggered_Implementation(ActionValue);
 }
 
 #undef LOCTEXT_NAMESPACE

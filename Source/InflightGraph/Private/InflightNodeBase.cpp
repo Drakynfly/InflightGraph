@@ -2,8 +2,16 @@
 
 #include "InflightNodeBase.h"
 
+#include "InflightGraph.h"
+
+UInflightGraph* UInflightNodeBase::GetInflightGraph() const
+{
+	return GetTypedOuter<UInflightGraph>();
+}
+
 #if WITH_EDITOR
-void UInflightNodeBase::SetLinkedNodes(TSet<TObjectPtr<UInflightNodeBase>> Nodes)
+
+void UInflightNodeBase::SetLinkedNodes(const TSet<TObjectPtr<UInflightNodeBase>>& Nodes)
 {
 	LinkedNodes = Nodes;
 }
@@ -45,11 +53,11 @@ void UInflightNodeBase::RemoveActivationTrigger(UObject* Trigger)
 	}
 }
 
-void UInflightNodeBase::Trigger()
+void UInflightNodeBase::Trigger(const FInputActionValue& ActionValue)
 {
 	if (ensure(Activated))
 	{
-		OnTriggered();
+		OnTriggered(ActionValue);
 	}
 }
 
@@ -57,6 +65,7 @@ void UInflightNodeBase::Activate()
 {
 	if (ensure(!Activated))
 	{
+		GetInflightGraph()->MarkNodeActive(this);
 		Activated = true;
 		OnActivated();
 	}
@@ -68,6 +77,7 @@ void UInflightNodeBase::Deactivate()
 	{
 		OnDeactivated();
 		Activated = false;
+		GetInflightGraph()->MarkNodeActive(this);
 	}
 }
 
@@ -79,6 +89,6 @@ void UInflightNodeBase::OnDeactivated_Implementation()
 {
 }
 
-void UInflightNodeBase::OnTriggered_Implementation()
+void UInflightNodeBase::OnTriggered_Implementation(const FInputActionValue& ActionValue)
 {
 }

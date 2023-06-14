@@ -7,6 +7,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "InflightGraphNode_State.h"
+#include "InflightStartNode.h"
 
 UInflightGraph::UInflightGraph()
 {
@@ -26,11 +27,10 @@ bool UInflightGraph::TryActivate(APawn* Owner, AController* Controller)
 	if (!IsAsset() &&
 		!IsTemplate() &&
 		!ActiveGraph &&
-		IsValid(RootState) &&
+		IsValid(StartNode) &&
 		IsValid(Owner) &&
 		IsValid(Controller))
 	{
-		ActiveGraph = true;
 		ActivePawn = Owner;
 
 		InputComponent = Controller->InputComponent;
@@ -38,7 +38,8 @@ bool UInflightGraph::TryActivate(APawn* Owner, AController* Controller)
 
 		ActivePawn->ReceiveControllerChangedDelegate.AddDynamic(this, &ThisClass::OnControllerChanged);
 
-		SetActiveState(RootState);
+		StartNode->AddActivationTrigger(this);
+		ActiveGraph = true;
 
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s activated! Bound to %s"), *GetName(), *Controller->GetName())
 	}
@@ -56,8 +57,20 @@ void UInflightGraph::Deactivate()
 		ActivePawn = nullptr;
 		InputComponent = nullptr;
 
+		ensure(AllActiveNodes.IsEmpty());
+
 		UE_LOG(LogInflightGraph, Log, TEXT("Inflight Graph %s deactivated!"), *GetName())
 	}
+}
+
+void UInflightGraph::MarkNodeActive(UInflightNodeBase* Node)
+{
+	AllActiveNodes.Add(Node);
+}
+
+void UInflightGraph::MarkNodeInactive(UInflightNodeBase* Node)
+{
+	AllActiveNodes.Remove(Node);
 }
 
 bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
@@ -75,7 +88,7 @@ bool UInflightGraph::SetActiveState(UInflightState* NewActiveState)
 	}
 
 	// Ensure the state is a valid state that we own.
-	if (IsValid(NewActiveState) && NewActiveState->GetOuter() == this)
+	if (IsValid(NewActiveState) && NewActiveState->GetInflightGraph() == this)
 	{
 		ActiveState = NewActiveState;
 		NewActiveState->AddActivationTrigger(this);
@@ -121,27 +134,3 @@ void UInflightGraph::OnControllerChanged(APawn* Pawn, AController* OldController
 
 	SetupInputComponent();
 }
-
-#if WITH_EDITOR
-TArray<FString> UInflightGraph::GetRootNodeOptions() const
-{
-	TArray<FString> StateNames;
-
-	TArray<UHeartGraphNode*> AllNodes;
-	GetNodeArray(AllNodes);
-	for (auto&& Node : AllNodes)
-	{
-		if (UInflightState* AsState = Node->GetNodeObject<UInflightState>())
-		{
-			StateNames.AddUnique(AsState->GetStateName());
-		}
-	}
-
-	return StateNames;
-}
-
-void UInflightGraph::SetRootState(UInflightState* State)
-{
-	RootState = State;
-}
-#endif

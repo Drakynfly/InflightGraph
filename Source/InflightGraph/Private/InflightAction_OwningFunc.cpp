@@ -4,9 +4,9 @@
 
 #include "InflightGraph.h"
 
-void UInflightAction_OwningFunc::OnTriggered_Implementation()
+void UInflightAction_OwningFunc::OnTriggered_Implementation(const FInputActionValue& ActionValue)
 {
 	FSimpleDelegate Func;
-	Func.BindUFunction(GetOuterUInflightGraph()->GetActivePawn(), FunctionName);
+	Func.BindUFunction(GetInflightGraph()->GetActivePawn(), FunctionName);
 	Func.Execute();
 }

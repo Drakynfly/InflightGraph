@@ -5,7 +5,7 @@
 #include "InflightGraph.h"
 #include "InflightGraphNodeBase.h"
 #include "InflightNodeBase.h"
-#include "InflightState.h"
+#include "InflightStartNode.h"
 
 void UCompileInflightGraph::ExecuteOnGraph(UHeartGraph* Graph, const FHeartInputActivation& Activation,
 										   UObject* ContextObject)
@@ -48,12 +48,9 @@ void UCompileInflightGraph::ExecuteOnGraph(UHeartGraph* Graph, const FHeartInput
 
 		InflightNode->SetLinkedNodes(LinkedNodes);
 
-		if (UInflightState* AsState = Cast<UInflightState>(InflightNode))
+		if (UInflightStartNode* StartNode = Cast<UInflightStartNode>(InflightNode))
 		{
-			if (AsState->GetStateName() == InflightGraph->GetRootNode())
-			{
-				InflightGraph->SetRootState(AsState);
-			}
+			InflightGraph->StartNode = StartNode;
 		}
 	}
 }
