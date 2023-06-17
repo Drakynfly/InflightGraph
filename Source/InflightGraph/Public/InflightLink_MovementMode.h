@@ -20,6 +20,8 @@ protected:
 	UFUNCTION()
 	void ModeTrigger(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
 
+	void CheckMovementMode();
+
 public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inflight Link")
 	TEnumAsByte<EMovementMode> ListeningMode;

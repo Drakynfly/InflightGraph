@@ -17,6 +17,8 @@ void UInflightLink_MovementMode::OnActivated_Implementation()
 	if (ACharacter* Character = Cast<ACharacter>(GetInflightGraph()->GetActivePawn()))
 	{
 		Character->MovementModeChangedDelegate.AddDynamic(this, &UInflightLink_MovementMode::ModeTrigger);
+
+		CheckMovementMode();
 	}
 	else
 	{
@@ -38,9 +40,17 @@ void UInflightLink_MovementMode::OnDeactivated_Implementation()
 void UInflightLink_MovementMode::ModeTrigger(ACharacter* Character, EMovementMode PrevMovementMode,
                                              uint8 PreviousCustomMode)
 {
-	if (ListeningMode == Cast<UCharacterMovementComponent>(Character->GetMovementComponent())->MovementMode)
+	CheckMovementMode();
+}
+
+void UInflightLink_MovementMode::CheckMovementMode()
+{
+	if (const ACharacter* Character = Cast<ACharacter>(GetInflightGraph()->GetActivePawn()))
 	{
-		UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" ListeningMode detected"), *GetName())
-		Trigger(FInputActionValue());
+		if (ListeningMode == Cast<UCharacterMovementComponent>(Character->GetMovementComponent())->MovementMode)
+		{
+			UE_LOG(LogInflightGraph, Log, TEXT("Movement mode change link \"%s\" ListeningMode detected"), *GetName())
+			Trigger(FInputActionValue());
+		}
 	}
 }
